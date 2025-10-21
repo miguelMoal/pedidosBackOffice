@@ -14,6 +14,94 @@ export type Database = {
   }
   public: {
     Tables: {
+      coupons: {
+        Row: {
+          code: string
+          created_at: string
+          discount: number
+          id: number
+          is_active: boolean | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          discount: number
+          id?: number
+          is_active?: boolean | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          discount?: number
+          id?: number
+          is_active?: boolean | null
+        }
+        Relationships: []
+      }
+      item_booth: {
+        Row: {
+          car_model: string | null
+          created_at: string
+          id: number
+          order_id: number | null
+          plates: string | null
+        }
+        Insert: {
+          car_model?: string | null
+          created_at?: string
+          id?: number
+          order_id?: number | null
+          plates?: string | null
+        }
+        Update: {
+          car_model?: string | null
+          created_at?: string
+          id?: number
+          order_id?: number | null
+          plates?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_booth_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      item_gubernamental: {
+        Row: {
+          building: string | null
+          created_at: string
+          floor: string | null
+          id: number
+          order_id: number | null
+        }
+        Insert: {
+          building?: string | null
+          created_at?: string
+          floor?: string | null
+          id?: number
+          order_id?: number | null
+        }
+        Update: {
+          building?: string | null
+          created_at?: string
+          floor?: string | null
+          id?: number
+          order_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_gubernamental_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       item_order: {
         Row: {
           created_at: string
@@ -55,24 +143,41 @@ export type Database = {
       }
       orders: {
         Row: {
+          confirmation_code: string | null
+          coupon_applied: number | null
           created_at: string
           id: number
+          order_type: Database["public"]["Enums"]["ORDER_TYPE"] | null
           status: Database["public"]["Enums"]["STATUS_ORDER"]
           user_phone: string
         }
         Insert: {
+          confirmation_code?: string | null
+          coupon_applied?: number | null
           created_at?: string
           id?: number
+          order_type?: Database["public"]["Enums"]["ORDER_TYPE"] | null
           status?: Database["public"]["Enums"]["STATUS_ORDER"]
           user_phone: string
         }
         Update: {
+          confirmation_code?: string | null
+          coupon_applied?: number | null
           created_at?: string
           id?: number
+          order_type?: Database["public"]["Enums"]["ORDER_TYPE"] | null
           status?: Database["public"]["Enums"]["STATUS_ORDER"]
           user_phone?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_coupon_applied_fkey"
+            columns: ["coupon_applied"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
@@ -131,6 +236,7 @@ export type Database = {
     }
     Enums: {
       BUSINESS_TYPE: "JAGUARES" | "PUESTO"
+      ORDER_TYPE: "GUBERNAMENTAL" | "CASETA"
       STATUS_ORDER: "INIT" | "IN_PROGRESS" | "READY" | "DELIVERED" | "PAYED"
     }
     CompositeTypes: {
@@ -260,6 +366,7 @@ export const Constants = {
   public: {
     Enums: {
       BUSINESS_TYPE: ["JAGUARES", "PUESTO"],
+      ORDER_TYPE: ["GUBERNAMENTAL", "CASETA"],
       STATUS_ORDER: ["INIT", "IN_PROGRESS", "READY", "DELIVERED", "PAYED"],
     },
   },

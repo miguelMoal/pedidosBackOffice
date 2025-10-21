@@ -57,6 +57,6 @@
       "scripts": {
             "dev": "vite",
             "build": "vite build",
-            "start": "vite --port=5177 --strictPort",
+            "start": "vite --port=5177 --strictPort"
       }
 }
