@@ -48,6 +48,7 @@ export async function obtenerPedidos(userPhone: string): Promise<Pedido[]> {
   try {
     
     // Obtener órdenes con sus items y productos del usuario actual
+    // Excluir órdenes con status INIT (no pagadas)
     const { data: orders, error } = await supabase
       .from('orders')
       .select(`
@@ -66,6 +67,7 @@ export async function obtenerPedidos(userPhone: string): Promise<Pedido[]> {
         )
       `)
       .eq('user_phone', userPhone)
+      .neq('status', 'INIT')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -217,6 +219,7 @@ export async function obtenerPedidoPorId(id: string, userPhone: string): Promise
       `)
       .eq('id', parseInt(id))
       .eq('user_phone', userPhone)
+      .neq('status', 'INIT')
       .single();
 
     if (error) {
