@@ -10,11 +10,11 @@ const MAPEO_ESTADOS: Record<EstadoSupabase, EstadoPedido> = {
   'IN_PROGRESS': 'PREPARANDO', 
   'READY': 'LISTO',
   'DELIVERED': 'ENTREGADO',
-  'PAYED': 'ENTREGADO'
+  'PAYED': 'NUEVO'  // PAYED significa que ya pagó pero apenas va a empezar
 };
 
 const MAPEO_ESTADOS_INVERSO: Record<EstadoPedido, EstadoSupabase> = {
-  'NUEVO': 'INIT',
+  'NUEVO': 'PAYED',      // NUEVO se mapea a PAYED (ya pagado, listo para preparar)
   'PREPARANDO': 'IN_PROGRESS',
   'LISTO': 'READY', 
   'ENTREGADO': 'DELIVERED'
