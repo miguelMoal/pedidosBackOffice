@@ -46,17 +46,5 @@ export function SupabaseStatus() {
     disconnected: 'Modo offline'
   };
 
-  return (
-    <div className="fixed bottom-4 right-4 z-50">
-      <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border shadow-lg transition-all ${coloresEstado[estado]}`}>
-        {iconosEstado[estado]}
-        <span className="text-sm">{textosEstado[estado]}</span>
-        {estado === 'connected' && ultimaSincronizacion && (
-          <span className="text-xs opacity-70">
-            ({ultimaSincronizacion.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })})
-          </span>
-        )}
-      </div>
-    </div>
-  );
+  return null; // Ocultar el componente
 }
