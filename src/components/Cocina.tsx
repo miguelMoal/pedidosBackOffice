@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { getTodosPedidos, getTodosPedidosAsync, actualizarEstadoPedido, getEstadoInfo, type Pedido, type EstadoPedido } from "../utils/pedidos";
+import { obtenerTelefonoUsuario } from "../utils/url";
 import { toast } from "sonner@2.0.3";
 
 type Filtro = "todos" | "NUEVO" | "PREPARANDO" | "LISTO" | "ENTREGADO";
@@ -18,7 +19,8 @@ export function Cocina() {
 
   const cargarPedidos = async () => {
     try {
-      const todosPedidos = await getTodosPedidosAsync();
+      const userPhone = obtenerTelefonoUsuario();
+      const todosPedidos = await getTodosPedidosAsync(userPhone);
       setPedidos(todosPedidos);
     } catch (error) {
       console.error("Error cargando pedidos:", error);
@@ -64,7 +66,8 @@ export function Cocina() {
     
     // Esperar que termine la animación antes de actualizar
     setTimeout(() => {
-      actualizarEstadoPedido(id, nuevoEstado);
+      const userPhone = obtenerTelefonoUsuario();
+      actualizarEstadoPedido(id, nuevoEstado, userPhone);
       cargarPedidos();
       setPedidoAnimando(null);
       

@@ -43,11 +43,11 @@ export interface Pedido {
   };
 }
 
-// Obtener todos los pedidos de Supabase
-export async function obtenerPedidos(): Promise<Pedido[]> {
+// Obtener todos los pedidos de Supabase para un usuario específico
+export async function obtenerPedidos(userPhone: string): Promise<Pedido[]> {
   try {
     
-    // Obtener órdenes con sus items y productos
+    // Obtener órdenes con sus items y productos del usuario actual
     const { data: orders, error } = await supabase
       .from('orders')
       .select(`
@@ -65,6 +65,7 @@ export async function obtenerPedidos(): Promise<Pedido[]> {
           )
         )
       `)
+      .eq('user_phone', userPhone)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -122,14 +123,15 @@ export async function obtenerPedidos(): Promise<Pedido[]> {
 }
 
 // Actualizar estado de un pedido en Supabase
-export async function actualizarEstadoPedido(id: string, nuevoEstado: EstadoPedido): Promise<void> {
+export async function actualizarEstadoPedido(id: string, nuevoEstado: EstadoPedido, userPhone: string): Promise<void> {
   try {
     const estadoSupabase = MAPEO_ESTADOS_INVERSO[nuevoEstado];
     
     const { error } = await supabase
       .from('orders')
       .update({ status: estadoSupabase })
-      .eq('id', parseInt(id));
+      .eq('id', parseInt(id))
+      .eq('user_phone', userPhone);
 
     if (error) {
       console.error('Error actualizando estado:', error);
@@ -142,14 +144,14 @@ export async function actualizarEstadoPedido(id: string, nuevoEstado: EstadoPedi
 }
 
 // Crear un nuevo pedido en Supabase
-export async function crearPedido(pedido: Omit<Pedido, 'id' | 'timestamp' | 'hora'>): Promise<Pedido> {
+export async function crearPedido(pedido: Omit<Pedido, 'id' | 'timestamp' | 'hora'>, userPhone: string): Promise<Pedido> {
   try {
     
     // Crear la orden
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
-        user_phone: '0000000000', // Teléfono por defecto
+        user_phone: userPhone,
         status: 'INIT'
       })
       .select()
@@ -192,8 +194,8 @@ export async function crearPedido(pedido: Omit<Pedido, 'id' | 'timestamp' | 'hor
   }
 }
 
-// Obtener un pedido específico por ID
-export async function obtenerPedidoPorId(id: string): Promise<Pedido | null> {
+// Obtener un pedido específico por ID y usuario
+export async function obtenerPedidoPorId(id: string, userPhone: string): Promise<Pedido | null> {
   try {
     
     const { data: order, error } = await supabase
@@ -214,6 +216,7 @@ export async function obtenerPedidoPorId(id: string): Promise<Pedido | null> {
         )
       `)
       .eq('id', parseInt(id))
+      .eq('user_phone', userPhone)
       .single();
 
     if (error) {
