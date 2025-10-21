@@ -200,7 +200,18 @@ export async function getTodosPedidosAsync(userPhone?: string): Promise<Pedido[]
   return getTodosPedidos();
 }
 
-export function actualizarEstadoPedido(id: string, nuevoEstado: EstadoPedido, userPhone?: string) {
+export async function actualizarEstadoPedido(id: string, nuevoEstado: EstadoPedido, userPhone?: string) {
+  // Si está habilitado Supabase, actualizar primero en Supabase
+  if (USE_SUPABASE && userPhone) {
+    try {
+      await actualizarEstadoPedidoAsync(id, nuevoEstado, userPhone);
+    } catch (error) {
+      console.error('Error actualizando estado en Supabase:', error);
+      throw error;
+    }
+  }
+  
+  // Actualizar localStorage como fallback
   const pedidos = getTodosPedidos();
   const index = pedidos.findIndex(p => p.id === id);
   if (index >= 0) {
@@ -212,13 +223,6 @@ export function actualizarEstadoPedido(id: string, nuevoEstado: EstadoPedido, us
     if (pedidoActual && pedidoActual.id === id) {
       pedidoActual.estado = nuevoEstado;
       localStorage.setItem("pedidoActual", JSON.stringify(pedidoActual));
-    }
-    
-    // Si está habilitado Supabase, sincronizar
-    if (USE_SUPABASE) {
-      actualizarEstadoPedidoAsync(id, nuevoEstado, userPhone).catch(error => {
-        console.error('Error sincronizando con Supabase:', error);
-      });
     }
     
     // Disparar evento para actualizar contador en tiempo real

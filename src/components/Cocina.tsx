@@ -60,16 +60,21 @@ export function Cocina() {
     setDialogAbierto(true);
   };
 
-  const cambiarEstadoPedido = (id: string, nuevoEstado: EstadoPedido) => {
+  const cambiarEstadoPedido = async (id: string, nuevoEstado: EstadoPedido) => {
     // Activar animación
     setPedidoAnimando(id);
     
     // Esperar que termine la animación antes de actualizar
-    setTimeout(() => {
-      const userPhone = obtenerTelefonoUsuario();
-      actualizarEstadoPedido(id, nuevoEstado, userPhone);
-      cargarPedidos();
-      setPedidoAnimando(null);
+    setTimeout(async () => {
+      try {
+        const userPhone = obtenerTelefonoUsuario();
+        await actualizarEstadoPedido(id, nuevoEstado, userPhone);
+        await cargarPedidos();
+        setPedidoAnimando(null);
+      } catch (error) {
+        console.error('Error actualizando estado:', error);
+        setPedidoAnimando(null);
+      }
       
       // Animar el contador del nuevo estado
       setContadorAnimando(nuevoEstado);
