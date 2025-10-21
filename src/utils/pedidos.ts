@@ -1,4 +1,10 @@
 import { apiCall } from './supabase/client';
+import { 
+  obtenerPedidos, 
+  actualizarEstadoPedido as actualizarEstadoSupabase,
+  crearPedido as crearPedidoSupabase,
+  obtenerPedidoPorId
+} from '../supabase/actions/pedidos';
 
 export type EstadoPedido = 
   | "NUEVO" 
@@ -183,8 +189,9 @@ export function getTodosPedidos(): Pedido[] {
 export async function getTodosPedidosAsync(): Promise<Pedido[]> {
   if (USE_SUPABASE) {
     try {
-      const response = await apiCall('/pedidos');
-      return response.pedidos || [];
+      // Usar las nuevas acciones de Supabase
+      const pedidos = await obtenerPedidos();
+      return pedidos;
     } catch (error) {
       console.error('Error obteniendo pedidos de Supabase, usando localStorage:', error);
       return getTodosPedidos();
@@ -222,10 +229,8 @@ export function actualizarEstadoPedido(id: string, nuevoEstado: EstadoPedido) {
 export async function actualizarEstadoPedidoAsync(id: string, nuevoEstado: EstadoPedido) {
   if (USE_SUPABASE) {
     try {
-      await apiCall(`/pedidos/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ estado: nuevoEstado })
-      });
+      // Usar las nuevas acciones de Supabase
+      await actualizarEstadoSupabase(id, nuevoEstado);
     } catch (error) {
       console.error('Error actualizando estado en Supabase:', error);
       throw error;
@@ -268,4 +273,45 @@ export function getEstadoInfo(estado: EstadoPedido): { color: string; texto: str
     ENTREGADO: { color: "bg-green-700 text-white", texto: "Entregado" }
   };
   return estados[estado];
+}
+
+// Función para crear un nuevo pedido usando Supabase
+export async function crearPedidoNuevo(pedido: Omit<Pedido, 'id' | 'timestamp' | 'hora'>): Promise<Pedido> {
+  if (USE_SUPABASE) {
+    try {
+      return await crearPedidoSupabase(pedido);
+    } catch (error) {
+      console.error('Error creando pedido en Supabase:', error);
+      throw error;
+    }
+  } else {
+    // Fallback a localStorage
+    const nuevoPedido: Pedido = {
+      ...pedido,
+      id: generarIdPedido(),
+      timestamp: Date.now(),
+      hora: new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
+    };
+    
+    const pedidos = getTodosPedidos();
+    pedidos.push(nuevoPedido);
+    localStorage.setItem("pedidos", JSON.stringify(pedidos));
+    
+    return nuevoPedido;
+  }
+}
+
+// Función para obtener un pedido específico
+export async function obtenerPedido(id: string): Promise<Pedido | null> {
+  if (USE_SUPABASE) {
+    try {
+      return await obtenerPedidoPorId(id);
+    } catch (error) {
+      console.error('Error obteniendo pedido de Supabase:', error);
+      return null;
+    }
+  } else {
+    const pedidos = getTodosPedidos();
+    return pedidos.find(p => p.id === id) || null;
+  }
 }
