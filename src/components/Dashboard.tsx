@@ -2,21 +2,111 @@ import { useEffect, useState } from "react";
 import { TrendingUp, TrendingDown, Calendar, MapPin, Package } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { ventasData } from "../data/ventas";
+import { obtenerPedidos } from "../supabase/actions/pedidos";
+import { obtenerTelefonoUsuario } from "../utils/url";
 
 export function Dashboard() {
-  const [ventas] = useState(ventasData);
+  const [ventas, setVentas] = useState(ventasData);
+  const [, setPedidos] = useState<any[]>([]);
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const topProductos = ventas.porProducto.slice(0, 5);
   const bottomProductos = ventas.porProducto.slice(-5).reverse();
   const topZonas = ventas.porZona.slice(0, 5);
+
+  const procesarDatosVentas = (pedidosData: any[]) => {
+    // Agrupar por día
+    const ventasPorDia = pedidosData.reduce((acc, pedido) => {
+      const fecha = new Date(pedido.timestamp).toISOString().split('T')[0];
+      if (!acc[fecha]) {
+        acc[fecha] = { fecha, total: 0 };
+      }
+      acc[fecha].total += pedido.total;
+      return acc;
+    }, {} as Record<string, { fecha: string; total: number }>);
+
+    // Agrupar por producto
+    const ventasPorProducto = pedidosData.reduce((acc, pedido) => {
+      pedido.items.forEach((item: any) => {
+        const key = item.nombre;
+        if (!acc[key]) {
+          acc[key] = { nombre: item.nombre, cantidad: 0, total: 0 };
+        }
+        acc[key].cantidad += item.cantidad;
+        acc[key].total += item.precio * item.cantidad;
+      });
+      return acc;
+    }, {} as Record<string, { nombre: string; cantidad: number; total: number }>);
+
+    // Agrupar por zona (usando tipo de entrega como zona)
+    const ventasPorZona = pedidosData.reduce((acc, pedido) => {
+      const zona = pedido.tipoEntrega || 'Delivery';
+      if (!acc[zona]) {
+        acc[zona] = { zona, ventas: 0, total: 0 };
+      }
+      acc[zona].ventas += 1;
+      acc[zona].total += pedido.total;
+      return acc;
+    }, {} as Record<string, { zona: string; ventas: number; total: number }>);
+
+    return {
+      porDia: Object.values(ventasPorDia).sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime()),
+      porProducto: Object.values(ventasPorProducto).sort((a, b) => b.cantidad - a.cantidad),
+      porZona: Object.values(ventasPorZona).sort((a, b) => b.total - a.total)
+    };
+  };
+
+  const cargarDatos = async () => {
+    try {
+      setCargando(true);
+      setError(null);
+      
+      const userPhone = obtenerTelefonoUsuario();
+      const pedidosData = await obtenerPedidos(userPhone);
+      setPedidos(pedidosData);
+      
+      // Procesar datos de ventas desde pedidos reales
+      const ventasProcesadas = procesarDatosVentas(pedidosData);
+      setVentas(ventasProcesadas);
+    } catch (err) {
+      console.error("Error cargando datos del dashboard:", err);
+      setError("Error al cargar los datos. Usando datos de ejemplo.");
+      // Mantener datos estáticos como fallback
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarDatos();
+  }, []);
 
   const totalVentas = ventas.porDia.reduce((sum, d) => sum + d.total, 0);
   const promedioVentas = Math.round(totalVentas / ventas.porDia.length);
 
   return (
     <div className="space-y-6">
+      {/* Mensaje de error */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
+      {/* Indicador de carga */}
+      {cargando && (
+        <div className="flex items-center justify-center py-8">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 border-2 border-[#012B67] border-t-transparent rounded-full animate-spin" />
+            <span className="text-[#64748B]">Cargando datos del dashboard...</span>
+          </div>
+        </div>
+      )}
+
       {/* Stats principales */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {!cargando && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
@@ -64,10 +154,12 @@ export function Dashboard() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Gráfica de ventas por día */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      {!cargando && (
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 bg-[#012B67] rounded-xl flex items-center justify-center">
             <Calendar className="w-5 h-5 text-white" />
@@ -94,9 +186,11 @@ export function Dashboard() {
             <Bar dataKey="total" fill="#012B67" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
-      </div>
+        </div>
+      )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {!cargando && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Productos más vendidos */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3 mb-6">
@@ -152,10 +246,12 @@ export function Dashboard() {
             ))}
           </div>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Zonas con más ventas */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      {!cargando && (
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center">
             <MapPin className="w-5 h-5 text-white" />
@@ -181,7 +277,8 @@ export function Dashboard() {
             </div>
           ))}
         </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
