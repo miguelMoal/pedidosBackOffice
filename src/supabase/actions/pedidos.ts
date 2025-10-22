@@ -47,6 +47,7 @@ export interface Pedido {
   usuario: {
     nombre: string;
     foto: string;
+    telefono: string;
   };
   cupon?: {
     codigo: string;
@@ -190,7 +191,8 @@ export async function obtenerPedidos(userPhone: string): Promise<Pedido[]> {
         timestamp: new Date(order.created_at).getTime(),
         usuario: {
           nombre: nombreUsuario,
-          foto: `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreUsuario)}&background=random`
+          foto: `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreUsuario)}&background=random`,
+          telefono: order.user_phone
         },
         cupon,
         precioEnvio
@@ -429,7 +431,8 @@ export async function obtenerPedidoPorId(id: string, userPhone: string): Promise
       timestamp: new Date(order.created_at).getTime(),
       usuario: {
         nombre: user?.name || 'Cliente',
-        foto: `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Cliente')}&background=random`
+        foto: `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Cliente')}&background=random`,
+        telefono: order.user_phone
       },
       cupon,
       precioEnvio

@@ -22,8 +22,14 @@ export function Seguimiento() {
         const userPhone = obtenerTelefonoUsuario();
         const pedidos = await obtenerPedidos(userPhone);
         
-        // Mostrar los últimos 5 pedidos, ordenados por más recientes
-        setPedidosRecientes(pedidos.slice(0, 5));
+        // Filtrar pedidos: excluir solo ENTREGADO (DELIVERED)
+        // PAYED se mapea a NUEVO pero debe mostrarse en seguimiento
+        const pedidosFiltrados = pedidos.filter(pedido => 
+          pedido.estado !== 'ENTREGADO'
+        );
+        
+        // Mostrar todos los pedidos filtrados
+        setPedidosRecientes(pedidosFiltrados);
       } catch (err) {
         console.error("Error cargando pedidos:", err);
         setError("Error al cargar los pedidos. Usando datos locales como respaldo.");
@@ -31,7 +37,12 @@ export function Seguimiento() {
         // Fallback a datos locales
         try {
           const pedidos = getTodosPedidos();
-          setPedidosRecientes(pedidos.slice(0, 5));
+          // Filtrar pedidos: excluir solo ENTREGADO (DELIVERED)
+          // PAYED se mapea a NUEVO pero debe mostrarse en seguimiento
+          const pedidosFiltrados = pedidos.filter(pedido => 
+            pedido.estado !== 'ENTREGADO'
+          );
+          setPedidosRecientes(pedidosFiltrados);
         } catch (fallbackError) {
           console.error("Error en fallback:", fallbackError);
           setError("No se pudieron cargar los pedidos.");
@@ -56,13 +67,14 @@ export function Seguimiento() {
       // Primero intentar buscar por ID en Supabase
       const pedido = await obtenerPedidoPorId(busqueda.trim(), userPhone);
       
-      if (pedido) {
+      if (pedido && pedido.estado !== 'ENTREGADO') {
         setPedidoEncontrado(pedido);
       } else {
         // Si no se encuentra por ID, buscar en la lista local por nombre
         const pedidos = getTodosPedidos();
         const pedidoLocal = pedidos.find(p => 
-          p.usuario.nombre.toLowerCase().includes(busqueda.toLowerCase())
+          p.usuario.nombre.toLowerCase().includes(busqueda.toLowerCase()) &&
+          p.estado !== 'ENTREGADO'
         );
         setPedidoEncontrado(pedidoLocal || null);
       }
@@ -74,8 +86,9 @@ export function Seguimiento() {
       try {
         const pedidos = getTodosPedidos();
         const pedido = pedidos.find(p => 
-          p.id.toLowerCase() === busqueda.toLowerCase() ||
-          p.usuario.nombre.toLowerCase().includes(busqueda.toLowerCase())
+          (p.id.toLowerCase() === busqueda.toLowerCase() ||
+          p.usuario.nombre.toLowerCase().includes(busqueda.toLowerCase())) &&
+          p.estado !== 'ENTREGADO'
         );
         setPedidoEncontrado(pedido || null);
       } catch (fallbackError) {
@@ -222,7 +235,7 @@ export function Seguimiento() {
               <Clock className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-[#1E293B]">Pedidos recientes</h3>
+              <h3 className="text-[#1E293B]">Pedidos activos</h3>
               <p className="text-sm text-[#64748B]">Haz clic en un pedido para ver su seguimiento</p>
             </div>
           </div>
@@ -267,6 +280,7 @@ export function Seguimiento() {
                       <p className="text-xs text-[#64748B] group-hover:text-purple-200">{pedido.hora}</p>
                       <span className="text-xs text-[#FE7F1E] group-hover:text-[#FE7F1E]">${pedido.total}</span>
                     </div>
+                    <p className="text-xs text-[#64748B] group-hover:text-purple-200 mt-1">{pedido.usuario.telefono}</p>
                   </div>
                 </div>
               </button>
@@ -314,6 +328,7 @@ export function Seguimiento() {
                   <p className="text-sm text-[#64748B]">Cliente</p>
                   <h3 className="text-[#1E293B]">{pedidoEncontrado.usuario.nombre}</h3>
                   <p className="text-sm text-[#64748B]">Pedido #{pedidoEncontrado.id}</p>
+                  <p className="text-sm text-[#64748B]">{pedidoEncontrado.usuario.telefono}</p>
                 </div>
               </div>
 
