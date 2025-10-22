@@ -1,13 +1,12 @@
 import image_cbf401e0e450f82b3043656c47686eaa83198a31 from 'figma:asset/cbf401e0e450f82b3043656c47686eaa83198a31.png';
 import { useEffect, useState } from "react";
-import { Sandwich, Package, ShoppingBag, BarChart3, MapPin, Clock, Store, Settings } from "lucide-react";
+import { Sandwich, Package, ShoppingBag, BarChart3, MapPin, Clock, Store } from "lucide-react";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
 import { Cocina } from "./components/Cocina";
 import { Inventarios } from "./components/Inventarios";
 import { PedidosBackoffice } from "./components/PedidosBackoffice";
 import { Dashboard } from "./components/Dashboard";
 import { Seguimiento } from "./components/Seguimiento";
-import { ConfiguracionSupabase } from "./components/ConfiguracionSupabase";
 import { initializePedidos } from "./utils/pedidos";
 import { obtenerOrdenesPayed } from "./supabase/actions/pedidos";
 import { setEstadoCocina } from "./utils/cocina";
@@ -15,7 +14,7 @@ import { obtenerTelefonoUsuario } from "./utils/url";
 import { Toaster } from "./components/ui/sonner";
 import { SupabaseStatus } from "./components/SupabaseStatus";
 
-type Vista = "cocina" | "inventarios" | "pedidos" | "dashboard" | "seguimiento" | "configuracion";
+type Vista = "cocina" | "inventarios" | "pedidos" | "dashboard" | "seguimiento";
 
 export default function App() {
   const [vistaActual, setVistaActual] = useState<Vista>("cocina");
@@ -93,8 +92,7 @@ export default function App() {
     { id: "inventarios" as Vista, nombre: "Inventarios", icon: Package },
     { id: "pedidos" as Vista, nombre: "Pedidos", icon: ShoppingBag },
     { id: "dashboard" as Vista, nombre: "Dashboard", icon: BarChart3 },
-    { id: "seguimiento" as Vista, nombre: "Seguimiento", icon: MapPin },
-    { id: "configuracion" as Vista, nombre: "Supabase", icon: Settings }
+    { id: "seguimiento" as Vista, nombre: "Seguimiento", icon: MapPin }
   ];
 console.log("ordenesPendientes", ordenesPendientes)
 
@@ -184,7 +182,6 @@ console.log("ordenesPendientes", ordenesPendientes)
         {vistaActual === "pedidos" && <PedidosBackoffice />}
         {vistaActual === "dashboard" && <Dashboard />}
         {vistaActual === "seguimiento" && <Seguimiento />}
-        {vistaActual === "configuracion" && <ConfiguracionSupabase />}
       </div>
       
       {/* Toast notifications */}
