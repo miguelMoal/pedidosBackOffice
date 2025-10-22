@@ -208,7 +208,7 @@ export function Seguimiento() {
           <Button 
             onClick={buscarPedido}
             disabled={cargando || !busqueda.trim()}
-            className="bg-[#012B67] hover:bg-[#011d4a] text-white disabled:opacity-50"
+            className="bg-[#0C3B2A] hover:bg-[#011d4a] text-white disabled:opacity-50"
           >
             {cargando ? (
               <div className="w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -231,7 +231,7 @@ export function Seguimiento() {
       {!pedidoEncontrado && (
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-[#012B67] rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-[#0C3B2A] rounded-xl flex items-center justify-center">
               <Clock className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -244,7 +244,7 @@ export function Seguimiento() {
           {cargando && (
             <div className="flex items-center justify-center py-8">
               <div className="flex items-center gap-3">
-                <div className="w-6 h-6 border-2 border-[#012B67] border-t-transparent rounded-full animate-spin" />
+                <div className="w-6 h-6 border-2 border-[#0C3B2A] border-t-transparent rounded-full animate-spin" />
                 <span className="text-[#64748B]">Cargando pedidos...</span>
               </div>
             </div>
@@ -256,7 +256,7 @@ export function Seguimiento() {
               <button
                 key={pedido.id}
                 onClick={() => seleccionarPedido(pedido)}
-                className="p-4 bg-gray-100 hover:bg-[#012B67] hover:text-white rounded-xl border border-gray-300 hover:border-[#012B67] transition-all text-left group"
+                className="p-4 bg-gray-100 hover:bg-[#0C3B2A] hover:text-white rounded-xl border border-gray-300 hover:border-[#0C3B2A] transition-all text-left group"
               >
                 <div className="flex items-start gap-3">
                   <img 
@@ -266,7 +266,7 @@ export function Seguimiento() {
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm text-[#012B67] group-hover:text-white group-hover:underline">#{pedido.id}</span>
+                      <span className="text-sm text-[#0C3B2A] group-hover:text-white group-hover:underline">#{pedido.id}</span>
                       <span className={`w-2 h-2 rounded-full ${
                         pedido.estado === 'NUEVO' ? 'bg-emerald-500' :
                         pedido.estado === 'PREPARANDO' ? 'bg-amber-500' :

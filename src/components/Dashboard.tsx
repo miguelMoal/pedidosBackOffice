@@ -98,7 +98,7 @@ export function Dashboard() {
       {cargando && (
         <div className="flex items-center justify-center py-8">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 border-2 border-[#012B67] border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-[#0C3B2A] border-t-transparent rounded-full animate-spin" />
             <span className="text-[#64748B]">Cargando datos del dashboard...</span>
           </div>
         </div>
@@ -121,7 +121,7 @@ export function Dashboard() {
 
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-[#012B67] rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-[#0C3B2A] rounded-xl flex items-center justify-center">
               <Calendar className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -161,7 +161,7 @@ export function Dashboard() {
       {!cargando && (
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-[#012B67] rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-[#0C3B2A] rounded-xl flex items-center justify-center">
             <Calendar className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -183,7 +183,7 @@ export function Dashboard() {
               formatter={(value: number) => [`$${value}`, 'Total']}
               labelFormatter={(label) => new Date(label).toLocaleDateString('es-MX', { weekday: 'long', month: 'short', day: 'numeric' })}
             />
-            <Bar dataKey="total" fill="#012B67" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="total" fill="#0C3B2A" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
         </div>

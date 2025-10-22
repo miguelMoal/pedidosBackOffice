@@ -215,7 +215,7 @@ export function PedidosBackoffice() {
         {cargando && (
           <div className="flex items-center justify-center py-8">
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 border-2 border-[#012B67] border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-[#0C3B2A] border-t-transparent rounded-full animate-spin" />
               <span className="text-[#64748B]">Cargando pedidos...</span>
             </div>
           </div>
@@ -422,7 +422,7 @@ export function PedidosBackoffice() {
                     </SelectContent>
                   </Select>
                   {cargando && (
-                    <div className="w-5 h-5 border-2 border-[#012B67] border-t-transparent rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-[#0C3B2A] border-t-transparent rounded-full animate-spin" />
                   )}
                 </div>
               </div>

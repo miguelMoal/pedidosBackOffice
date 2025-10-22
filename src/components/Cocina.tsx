@@ -284,7 +284,7 @@ export function Cocina() {
                   onClick={() => setFiltro(f.id)}
                   className={`px-4 py-2 rounded-xl whitespace-nowrap transition-all flex items-center gap-2 flex-shrink-0 relative ${
                     filtro === f.id
-                      ? 'bg-[#012B67] text-white shadow-md scale-105'
+                      ? 'bg-[#0C3B2A] text-white shadow-md scale-105'
                       : 'bg-gray-100 text-[#64748B] hover:bg-gray-200'
                   }`}
                 >
@@ -659,7 +659,7 @@ export function Cocina() {
                     : 'bg-gray-500 cursor-not-allowed'
                 }`}
                 style={{
-                  backgroundColor: codigoVerificacion.trim() ? '#2563eb' : '#6b7280',
+                  backgroundColor: codigoVerificacion.trim() ? '#0C3B2A' : '#6b7280',
                   border: 'none',
                   outline: 'none'
                 }}

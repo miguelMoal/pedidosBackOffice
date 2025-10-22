@@ -173,7 +173,7 @@ export function Inventarios() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-[#012B67] rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-[#0C3B2A] rounded-xl flex items-center justify-center">
               <Package className="w-6 h-6 text-white" />
             </div>
              <div>
@@ -214,7 +214,7 @@ export function Inventarios() {
          <div className="flex flex-col sm:flex-row gap-3">
            <Button
              onClick={abrirModalNuevo}
-             className="bg-[#012B67] hover:bg-[#011d4a] text-white w-full sm:w-auto"
+             className="bg-[#0C3B2A] hover:bg-[#011d4a] text-white w-full sm:w-auto"
            >
              <Plus className="w-5 h-5 mr-2" />
              Nuevo producto
@@ -338,7 +338,7 @@ export function Inventarios() {
                 id="categoria"
                 value={formData.categoria || "Comida"}
                 onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#012B67]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0C3B2A]"
               >
                 <option value="Comida">Comida</option>
                 <option value="Bebidas">Bebidas</option>
@@ -420,7 +420,7 @@ export function Inventarios() {
             <div className="flex gap-3 pt-4">
               <Button
                 onClick={guardarProducto}
-                className="flex-1 bg-[#012B67] hover:bg-[#011d4a] text-white"
+                className="flex-1 bg-[#0C3B2A] hover:bg-[#011d4a] text-white"
               >
                 <Save className="w-4 h-4 mr-2" />
                 Guardar

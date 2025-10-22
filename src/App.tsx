@@ -99,7 +99,7 @@ console.log("ordenesPendientes", ordenesPendientes)
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header con navegación */}
-      <div className="bg-white text-[#012B67] sticky top-0 z-20 shadow-lg">
+      <div className="bg-white text-[#0C3B2A] sticky top-0 z-20 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           {/* Header principal con info del negocio */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-8 py-4 lg:py-6 border-b border-gray-200">
@@ -113,7 +113,7 @@ console.log("ordenesPendientes", ordenesPendientes)
                 />
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-[#012B67]">Jaguares de Nayarit</h1>
+                <h1 className="text-[#0C3B2A]">Jaguares de Nayarit</h1>
                 <div className="flex flex-col lg:flex-row lg:items-center gap-1 lg:gap-3 mt-1">
                   <div className="flex items-center gap-1 text-[#1E293B] text-sm">
                     <MapPin className="w-4 h-4 flex-shrink-0" />
@@ -162,8 +162,8 @@ console.log("ordenesPendientes", ordenesPendientes)
                   onClick={() => setVistaActual(nav.id)}
                   className={`px-4 lg:px-6 py-3 lg:py-4 rounded-t-xl whitespace-nowrap transition-all flex items-center gap-2 border-b-2 flex-shrink-0 ${
                     vistaActual === nav.id
-                      ? 'text-[#012B67] border-[#FE7F1E] bg-gray-50'
-                      : 'text-gray-600 hover:text-[#012B67] hover:bg-gray-50 border-transparent'
+                      ? 'text-[#0C3B2A] border-[#FE7F1E] bg-gray-50'
+                      : 'text-gray-600 hover:text-[#0C3B2A] hover:bg-gray-50 border-transparent'
                   }`}
                 >
                   <Icono className="w-5 h-5" />

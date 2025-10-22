@@ -111,7 +111,7 @@ export function ConfiguracionSupabase() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="p-6">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-[#012B67] rounded-xl flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 bg-[#0C3B2A] rounded-xl flex items-center justify-center flex-shrink-0">
               <RefreshCw className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
