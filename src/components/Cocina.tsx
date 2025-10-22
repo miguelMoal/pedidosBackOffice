@@ -348,12 +348,12 @@ export function Cocina() {
       {/* Dialog de detalle */}
       <Dialog open={dialogAbierto} onOpenChange={setDialogAbierto}>
         <DialogContent className="max-w-2xl">
-          {/* <DialogHeader>
+          <DialogHeader>
             <DialogTitle>Detalle del pedido #{pedidoSeleccionado?.id}</DialogTitle>
             <DialogDescription>
               Información completa del pedido y acciones disponibles
             </DialogDescription>
-          </DialogHeader> */}
+          </DialogHeader>
 
           {pedidoSeleccionado && (
             <div>
@@ -371,7 +371,7 @@ export function Cocina() {
               </div>
 
               {/* Estado actual */}
-              <div className={`p-4 ${getEstadoInfo(pedidoSeleccionado.estado).color} rounded-xl`}>
+              <div className={`p-4 ${getEstadoInfo(pedidoSeleccionado.estado).color} rounded-xl mb-4`}>
                 <div className="flex items-center gap-3">
                   {(() => {
                     const IconoEstadoDialog = obtenerIconoEstado(pedidoSeleccionado.estado);
@@ -384,20 +384,56 @@ export function Cocina() {
                 </div>
               </div>
 
-              {/* Info general */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 rounded-xl">
-                  <p className="text-sm text-[#64748B] mb-1">Hora recibida</p>
-                  <p className="text-[#1E293B]">{pedidoSeleccionado.hora}</p>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-xl">
-                  <p className="text-sm text-[#64748B] mb-1">Tipo</p>
-                  <p className="text-[#1E293B]">{pedidoSeleccionado.tipo}</p>
-                </div>
-              </div>
+               {/* Info general */}
+               {/* <div className="p-4 bg-gray-50 rounded-xl">
+                 <p className="text-sm text-[#64748B] mb-1">Tipo de orden</p>
+                 <p className="text-[#1E293B]">{pedidoSeleccionado.tipo}</p>
+               </div> */}
+
+               {/* Tipo de entrega y datos específicos */}
+               {pedidoSeleccionado.tipoEntrega && (
+                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl mb-4">
+                   <div className="flex items-center justify-between mb-3">
+                     <div className="flex items-center gap-2">
+                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                       <h3 className="text-[#1E293B] font-medium">
+                         {pedidoSeleccionado.tipoEntrega === "caseta" ? "Entrega en Caseta" : "Entrega Gubernamental"}
+                       </h3>
+                     </div>
+                     <div className="text-right">
+                       <p className="text-sm text-[#64748B]">Hora recibida</p>
+                       <p className="text-[#1E293B] font-medium">{pedidoSeleccionado.hora}</p>
+                     </div>
+                   </div>
+                   
+                   {pedidoSeleccionado.tipoEntrega === "caseta" ? (
+                     <div className="space-y-2">
+                       <div>
+                         <p className="text-sm text-[#64748B] mb-1">Dirección de entrega</p>
+                         <p className="text-[#1E293B] text-sm">{pedidoSeleccionado.direccion}</p>
+                       </div>
+                       <div className="grid grid-cols-2 gap-3">
+                         <div>
+                           <p className="text-sm text-[#64748B] mb-1">Vehículo</p>
+                           <p className="text-[#1E293B] text-sm">{pedidoSeleccionado.vehiculo}</p>
+                         </div>
+                         <div>
+                           <p className="text-sm text-[#64748B] mb-1">Placas</p>
+                           <p className="text-[#1E293B] text-sm font-mono">{pedidoSeleccionado.placas}</p>
+                         </div>
+                       </div>
+                     </div>
+                   ) : (
+                     <div>
+                       <p className="text-sm text-[#64748B] mb-1">Dirección de entrega</p>
+                       <p className="text-[#1E293B] text-sm">{pedidoSeleccionado.direccion}</p>
+                     </div>
+                   )}
+                 </div>
+               )}
 
               {/* Productos */}
-              <div style={{ height: '300px', overflowY: 'auto' }}>
+              <div style={{ height: '220px', overflowY: 'auto' }}>
                 <h3 className="text-[#1E293B] mb-3">Productos del pedido</h3>
                 <div className="space-y-2">
                   {pedidoSeleccionado.items.map((item) => (

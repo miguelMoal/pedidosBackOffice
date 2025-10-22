@@ -36,6 +36,10 @@ export interface Pedido {
   total: number;
   hora: string;
   tipo: "Delivery" | "Recoger";
+  tipoEntrega?: "caseta" | "gubernamental";
+  direccion?: string;
+  vehiculo?: string;
+  placas?: string;
   nota?: string;
   timestamp: number;
   usuario: {
@@ -63,6 +67,7 @@ export async function obtenerPedidos(userPhone: string): Promise<Pedido[]> {
         created_at,
         user_phone,
         price,
+        order_type,
         coupon_applied,
         coupons (
           code,
@@ -80,6 +85,15 @@ export async function obtenerPedidos(userPhone: string): Promise<Pedido[]> {
             price,
             image_url
           )
+        ),
+        item_booth (
+          car_model,
+          plates
+        ),
+        item_gubernamental (
+          address,
+          building,
+          floor
         )
       `)
       .eq('user_phone', userPhone)
@@ -132,6 +146,30 @@ export async function obtenerPedidos(userPhone: string): Promise<Pedido[]> {
       // Agregar precio de envío
       total += precioEnvio;
       
+      // Determinar tipo de entrega y datos correspondientes
+      let tipoEntrega: "caseta" | "gubernamental" | undefined;
+      let direccion: string | undefined;
+      let vehiculo: string | undefined;
+      let placas: string | undefined;
+      
+      if (order.order_type === 'CASETA' && order.item_booth && order.item_booth.length > 0) {
+        tipoEntrega = "caseta";
+        const boothData = order.item_booth[0];
+        vehiculo = boothData.car_model || undefined;
+        placas = boothData.plates || undefined;
+        direccion = "Caseta de peaje"; // Dirección genérica para casetas
+      } else if (order.order_type === 'GUBERNAMENTAL' && order.item_gubernamental && order.item_gubernamental.length > 0) {
+        tipoEntrega = "gubernamental";
+        const gubernamentalData = order.item_gubernamental[0];
+        direccion = gubernamentalData.address || undefined;
+        if (gubernamentalData.building) {
+          direccion += `, ${gubernamentalData.building}`;
+        }
+        if (gubernamentalData.floor) {
+          direccion += `, Piso ${gubernamentalData.floor}`;
+        }
+      }
+      
       return {
         id: order.id.toString(),
         estado: MAPEO_ESTADOS[order.status as EstadoSupabase] || 'NUEVO',
@@ -143,6 +181,10 @@ export async function obtenerPedidos(userPhone: string): Promise<Pedido[]> {
           minute: '2-digit' 
         }),
         tipo: "Delivery" as const, // Por defecto
+        tipoEntrega,
+        direccion,
+        vehiculo,
+        placas,
         timestamp: new Date(order.created_at).getTime(),
         usuario: {
           nombre: nombreUsuario,
@@ -244,6 +286,7 @@ export async function obtenerPedidoPorId(id: string, userPhone: string): Promise
         created_at,
         user_phone,
         price,
+        order_type,
         coupon_applied,
         coupons (
           code,
@@ -261,6 +304,15 @@ export async function obtenerPedidoPorId(id: string, userPhone: string): Promise
             price,
             image_url
           )
+        ),
+        item_booth (
+          car_model,
+          plates
+        ),
+        item_gubernamental (
+          address,
+          building,
+          floor
         )
       `)
       .eq('id', parseInt(id))
@@ -311,6 +363,30 @@ export async function obtenerPedidoPorId(id: string, userPhone: string): Promise
     // Agregar precio de envío
     total += precioEnvio;
     
+    // Determinar tipo de entrega y datos correspondientes
+    let tipoEntrega: "caseta" | "gubernamental" | undefined;
+    let direccion: string | undefined;
+    let vehiculo: string | undefined;
+    let placas: string | undefined;
+    
+    if (order.order_type === 'CASETA' && order.item_booth && order.item_booth.length > 0) {
+      tipoEntrega = "caseta";
+      const boothData = order.item_booth[0];
+      vehiculo = boothData.car_model || undefined;
+      placas = boothData.plates || undefined;
+      direccion = "Caseta de peaje"; // Dirección genérica para casetas
+    } else if (order.order_type === 'GUBERNAMENTAL' && order.item_gubernamental && order.item_gubernamental.length > 0) {
+      tipoEntrega = "gubernamental";
+      const gubernamentalData = order.item_gubernamental[0];
+      direccion = gubernamentalData.address || undefined;
+      if (gubernamentalData.building) {
+        direccion += `, ${gubernamentalData.building}`;
+      }
+      if (gubernamentalData.floor) {
+        direccion += `, Piso ${gubernamentalData.floor}`;
+      }
+    }
+    
     return {
       id: order.id.toString(),
       estado: MAPEO_ESTADOS[order.status as EstadoSupabase] || 'NUEVO',
@@ -322,6 +398,10 @@ export async function obtenerPedidoPorId(id: string, userPhone: string): Promise
         minute: '2-digit' 
       }),
       tipo: "Delivery" as const,
+      tipoEntrega,
+      direccion,
+      vehiculo,
+      placas,
       timestamp: new Date(order.created_at).getTime(),
       usuario: {
         nombre: user?.name || 'Cliente',

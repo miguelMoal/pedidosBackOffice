@@ -28,6 +28,10 @@ export interface Pedido {
   total: number;
   hora: string;
   tipo: "Delivery" | "Recoger";
+  tipoEntrega?: "caseta" | "gubernamental";
+  direccion?: string;
+  vehiculo?: string;
+  placas?: string;
   nota?: string;
   timestamp: number;
   usuario: {
@@ -59,6 +63,10 @@ export async function initializePedidos() {
       precioEnvio: 20,
       hora: new Date(ahora - 1 * 60000).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
       tipo: "Delivery",
+      tipoEntrega: "caseta",
+      direccion: "Caseta de peaje km 45, Carretera México-Puebla",
+      vehiculo: "Honda Civic",
+      placas: "ABC-123",
       timestamp: ahora - 1 * 60000,
       usuario: {
         nombre: "Carlos Ramírez",
@@ -75,7 +83,9 @@ export async function initializePedidos() {
       subtotal: 115,
       total: 115,
       hora: new Date(ahora - 2 * 60000).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
-      tipo: "Recoger",
+      tipo: "Delivery",
+      tipoEntrega: "gubernamental",
+      direccion: "Oficinas Gubernamentales, Av. Reforma 123, Col. Centro, CDMX",
       nota: "Sin cebolla en los nachos por favor",
       timestamp: ahora - 2 * 60000,
       usuario: {
