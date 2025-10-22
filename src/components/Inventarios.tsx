@@ -156,7 +156,7 @@ export function Inventarios() {
     }
   };
 
-  const productosActivos = productos.filter(p => p.activo).length;
+  const productosActivos = productos.filter(p => p.activo && p.stock > 0).length;
   const valorInventario = productos.reduce((sum, p) => sum + (p.activo ? p.costo : 0), 0);
 
   return (
@@ -203,26 +203,15 @@ export function Inventarios() {
       {/* Botón nuevo producto */}
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
         <h2 className="text-[#1E293B]">Gestión de productos</h2>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button
-            onClick={() => {
-              setProductos(productosData);
-              localStorage.setItem("productos", JSON.stringify(productosData));
-            }}
-            variant="outline"
-            className="text-[#012B67] border-[#012B67] w-full sm:w-auto"
-          >
-            <Package className="w-5 h-5 mr-2" />
-            Reiniciar datos
-          </Button>
-          <Button
-            onClick={abrirModalNuevo}
-            className="bg-[#012B67] hover:bg-[#011d4a] text-white w-full sm:w-auto"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Nuevo producto
-          </Button>
-        </div>
+         <div className="flex flex-col sm:flex-row gap-3">
+           <Button
+             onClick={abrirModalNuevo}
+             className="bg-[#012B67] hover:bg-[#011d4a] text-white w-full sm:w-auto"
+           >
+             <Plus className="w-5 h-5 mr-2" />
+             Nuevo producto
+           </Button>
+         </div>
       </div>
 
       {/* Tabla de productos */}
@@ -273,28 +262,28 @@ export function Inventarios() {
                         {margen}%
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <Badge 
-                        onClick={() => toggleActivo(producto.id)}
-                        className={`cursor-pointer transition-colors text-white flex items-center gap-1.5 ${
-                          producto.activo 
-                            ? 'bg-emerald-500 hover:bg-emerald-600' 
-                            : 'bg-slate-900 hover:bg-slate-800'
-                        }`}
-                      >
-                        {producto.activo ? (
-                          <>
-                            <CheckCircle className="w-3.5 h-3.5" />
-                            <span>Disponible</span>
-                          </>
-                        ) : (
-                          <>
-                            <XCircle className="w-3.5 h-3.5" />
-                            <span>Sin disponibilidad</span>
-                          </>
-                        )}
-                      </Badge>
-                    </td>
+                     <td className="px-6 py-4">
+                       <Badge 
+                         onClick={() => toggleActivo(producto.id)}
+                         className={`cursor-pointer transition-colors text-white flex items-center gap-1.5 ${
+                           producto.activo && producto.stock > 0
+                             ? 'bg-emerald-500 hover:bg-emerald-600' 
+                             : 'bg-slate-900 hover:bg-slate-800'
+                         }`}
+                       >
+                         {producto.activo && producto.stock > 0 ? (
+                           <>
+                             <CheckCircle className="w-3.5 h-3.5" />
+                             <span>Disponible</span>
+                           </>
+                         ) : (
+                           <>
+                             <XCircle className="w-3.5 h-3.5" />
+                             <span>{producto.stock === 0 ? 'Agotado' : 'Sin disponibilidad'}</span>
+                           </>
+                         )}
+                       </Badge>
+                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
                         <Button
