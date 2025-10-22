@@ -348,15 +348,15 @@ export function Cocina() {
       {/* Dialog de detalle */}
       <Dialog open={dialogAbierto} onOpenChange={setDialogAbierto}>
         <DialogContent className="max-w-2xl">
-          <DialogHeader>
+          {/* <DialogHeader>
             <DialogTitle>Detalle del pedido #{pedidoSeleccionado?.id}</DialogTitle>
             <DialogDescription>
               Información completa del pedido y acciones disponibles
             </DialogDescription>
-          </DialogHeader>
+          </DialogHeader> */}
 
           {pedidoSeleccionado && (
-            <div className="space-y-4">
+            <div>
               {/* Info del usuario */}
               <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
                 <img 
@@ -397,7 +397,7 @@ export function Cocina() {
               </div>
 
               {/* Productos */}
-              <div>
+              <div style={{ height: '300px', overflowY: 'auto' }}>
                 <h3 className="text-[#1E293B] mb-3">Productos del pedido</h3>
                 <div className="space-y-2">
                   {pedidoSeleccionado.items.map((item) => (
