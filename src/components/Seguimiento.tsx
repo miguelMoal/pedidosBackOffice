@@ -1,27 +1,90 @@
 import { useState, useEffect } from "react";
-import { Search, MapPin, Clock, User, Package, CheckCircle } from "lucide-react";
+import { Search, MapPin, Clock, Package, CheckCircle } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { getTodosPedidos, type Pedido } from "../utils/pedidos";
+import { obtenerPedidos, obtenerPedidoPorId } from "../supabase/actions/pedidos";
+import { obtenerTelefonoUsuario } from "../utils/url";
 
 export function Seguimiento() {
   const [busqueda, setBusqueda] = useState("");
   const [pedidoEncontrado, setPedidoEncontrado] = useState<Pedido | null>(null);
   const [pedidosRecientes, setPedidosRecientes] = useState<Pedido[]>([]);
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const pedidos = getTodosPedidos();
-    // Mostrar los últimos 5 pedidos, ordenados por más recientes
-    setPedidosRecientes(pedidos.slice(0, 5));
+    const cargarPedidos = async () => {
+      try {
+        setCargando(true);
+        setError(null);
+        
+        const userPhone = obtenerTelefonoUsuario();
+        const pedidos = await obtenerPedidos(userPhone);
+        
+        // Mostrar los últimos 5 pedidos, ordenados por más recientes
+        setPedidosRecientes(pedidos.slice(0, 5));
+      } catch (err) {
+        console.error("Error cargando pedidos:", err);
+        setError("Error al cargar los pedidos. Usando datos locales como respaldo.");
+        
+        // Fallback a datos locales
+        try {
+          const pedidos = getTodosPedidos();
+          setPedidosRecientes(pedidos.slice(0, 5));
+        } catch (fallbackError) {
+          console.error("Error en fallback:", fallbackError);
+          setError("No se pudieron cargar los pedidos.");
+        }
+      } finally {
+        setCargando(false);
+      }
+    };
+    
+    cargarPedidos();
   }, []);
 
-  const buscarPedido = () => {
-    const pedidos = getTodosPedidos();
-    const pedido = pedidos.find(p => 
-      p.id.toLowerCase() === busqueda.toLowerCase() ||
-      p.usuario.nombre.toLowerCase().includes(busqueda.toLowerCase())
-    );
-    setPedidoEncontrado(pedido || null);
+  const buscarPedido = async () => {
+    if (!busqueda.trim()) return;
+    
+    try {
+      setCargando(true);
+      setError(null);
+      
+      const userPhone = obtenerTelefonoUsuario();
+      
+      // Primero intentar buscar por ID en Supabase
+      const pedido = await obtenerPedidoPorId(busqueda.trim(), userPhone);
+      
+      if (pedido) {
+        setPedidoEncontrado(pedido);
+      } else {
+        // Si no se encuentra por ID, buscar en la lista local por nombre
+        const pedidos = getTodosPedidos();
+        const pedidoLocal = pedidos.find(p => 
+          p.usuario.nombre.toLowerCase().includes(busqueda.toLowerCase())
+        );
+        setPedidoEncontrado(pedidoLocal || null);
+      }
+    } catch (err) {
+      console.error("Error buscando pedido:", err);
+      setError("Error al buscar el pedido. Intentando con datos locales.");
+      
+      // Fallback a búsqueda local
+      try {
+        const pedidos = getTodosPedidos();
+        const pedido = pedidos.find(p => 
+          p.id.toLowerCase() === busqueda.toLowerCase() ||
+          p.usuario.nombre.toLowerCase().includes(busqueda.toLowerCase())
+        );
+        setPedidoEncontrado(pedido || null);
+      } catch (fallbackError) {
+        console.error("Error en fallback de búsqueda:", fallbackError);
+        setError("No se pudo realizar la búsqueda.");
+      }
+    } finally {
+      setCargando(false);
+    }
   };
 
   const seleccionarPedido = (pedido: Pedido) => {
@@ -34,7 +97,8 @@ export function Seguimiento() {
       NUEVO: 0,
       PREPARANDO: 1,
       LISTO: 2,
-      ENTREGADO: 3
+      EN_CAMINO: 3,
+      ENTREGADO: 4
     };
     return pasos[estado] || 0;
   };
@@ -68,6 +132,13 @@ export function Seguimiento() {
         fondo: 'bg-emerald-50',
         borde: 'border-emerald-200',
         texto: 'text-emerald-500'
+      },
+      purple: {
+        circulo: 'bg-purple-500',
+        anillo: 'ring-purple-100',
+        fondo: 'bg-purple-50',
+        borde: 'border-purple-200',
+        texto: 'text-purple-500'
       }
     };
 
@@ -100,7 +171,8 @@ export function Seguimiento() {
     { id: 0, nombre: "Recibido", descripcion: "Pedido confirmado", color: "gray", icon: Package },
     { id: 1, nombre: "En preparación", descripcion: "Cocinando tu pedido", color: "amber", icon: Clock },
     { id: 2, nombre: "Listo", descripcion: "Pedido listo para entregar", color: "blue", icon: CheckCircle },
-    { id: 3, nombre: "Entregado", descripcion: "Pedido completado", color: "emerald", icon: MapPin }
+    { id: 3, nombre: "En camino", descripcion: "Pedido en camino", color: "purple", icon: MapPin },
+    { id: 4, nombre: "Entregado", descripcion: "Pedido completado", color: "emerald", icon: CheckCircle }
   ];
 
   return (
@@ -117,16 +189,29 @@ export function Seguimiento() {
               onChange={(e) => setBusqueda(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && buscarPedido()}
               className="pl-10"
+              disabled={cargando}
             />
           </div>
           <Button 
             onClick={buscarPedido}
-            className="bg-[#012B67] hover:bg-[#011d4a] text-white"
+            disabled={cargando || !busqueda.trim()}
+            className="bg-[#012B67] hover:bg-[#011d4a] text-white disabled:opacity-50"
           >
-            <Search className="w-5 h-5 mr-2" />
-            Buscar
+            {cargando ? (
+              <div className="w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Search className="w-5 h-5 mr-2" />
+            )}
+            {cargando ? 'Buscando...' : 'Buscar'}
           </Button>
         </div>
+        
+        {/* Mensaje de error */}
+        {error && (
+          <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
       </div>
 
       {/* Pedidos recientes - Solo mostrar si NO hay búsqueda activa */}
@@ -142,8 +227,19 @@ export function Seguimiento() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {pedidosRecientes.map((pedido) => (
+          {/* Indicador de carga */}
+          {cargando && (
+            <div className="flex items-center justify-center py-8">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 border-2 border-[#012B67] border-t-transparent rounded-full animate-spin" />
+                <span className="text-[#64748B]">Cargando pedidos...</span>
+              </div>
+            </div>
+          )}
+
+          {!cargando && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {pedidosRecientes.map((pedido) => (
               <button
                 key={pedido.id}
                 onClick={() => seleccionarPedido(pedido)}
@@ -162,7 +258,8 @@ export function Seguimiento() {
                         pedido.estado === 'NUEVO' ? 'bg-emerald-500' :
                         pedido.estado === 'PREPARANDO' ? 'bg-amber-500' :
                         pedido.estado === 'LISTO' ? 'bg-cyan-500' :
-                        'bg-purple-500'
+                        pedido.estado === 'EN_CAMINO' ? 'bg-purple-500' :
+                        'bg-emerald-500'
                       }`}></span>
                     </div>
                     <p className="text-[#1E293B] group-hover:text-white truncate">{pedido.usuario.nombre}</p>
@@ -173,10 +270,11 @@ export function Seguimiento() {
                   </div>
                 </div>
               </button>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
-          {pedidosRecientes.length === 0 && (
+          {!cargando && pedidosRecientes.length === 0 && (
             <div className="text-center py-8">
               <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-3 flex items-center justify-center">
                 <Package className="w-8 h-8 text-gray-400" />
