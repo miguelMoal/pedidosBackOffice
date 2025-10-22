@@ -118,13 +118,18 @@ export function PedidosBackoffice() {
   };
 
   const exportarCSV = () => {
-    const headers = ["ID", "Cliente", "Total", "Estado", "Tipo", "Hora"];
+    const headers = ["ID", "Cliente", "Total", "Estado", "Tipo", "Fecha", "Hora"];
     const rows = pedidos.map(p => [
       p.id,
       p.usuario.nombre,
       p.total,
       p.estado,
       p.tipo,
+      new Date(p.timestamp).toLocaleDateString('es-MX', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+      }),
       p.hora
     ]);
     
@@ -227,6 +232,7 @@ export function PedidosBackoffice() {
                   <th className="px-6 py-4 text-left text-sm text-[#64748B]">Total</th>
                   <th className="px-6 py-4 text-left text-sm text-[#64748B]">Estado</th>
                   <th className="px-6 py-4 text-left text-sm text-[#64748B]">Tipo</th>
+                  <th className="px-6 py-4 text-left text-sm text-[#64748B]">Fecha</th>
                   <th className="px-6 py-4 text-left text-sm text-[#64748B]">Hora</th>
                   <th className="px-6 py-4 text-left text-sm text-[#64748B]">Acciones</th>
                 </tr>
@@ -254,6 +260,13 @@ export function PedidosBackoffice() {
                       </Badge>
                     </td>
                     <td className="px-6 py-4 text-[#64748B]">{pedido.tipo}</td>
+                    <td className="px-6 py-4 text-[#64748B]">
+                      {new Date(pedido.timestamp).toLocaleDateString('es-MX', { 
+                        day: '2-digit', 
+                        month: '2-digit', 
+                        year: 'numeric' 
+                      })}
+                    </td>
                     <td className="px-6 py-4 text-[#64748B]">{pedido.hora}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
@@ -314,7 +327,17 @@ export function PedidosBackoffice() {
                   <p className="text-xs text-[#64748B] mb-0.5">Tipo</p>
                   <p className="text-[#1E293B]">{pedido.tipo}</p>
                 </div>
-                <div className="col-span-2">
+                <div>
+                  <p className="text-xs text-[#64748B] mb-0.5">Fecha</p>
+                  <p className="text-[#1E293B]">
+                    {new Date(pedido.timestamp).toLocaleDateString('es-MX', { 
+                      day: '2-digit', 
+                      month: '2-digit', 
+                      year: 'numeric' 
+                    })}
+                  </p>
+                </div>
+                <div>
                   <p className="text-xs text-[#64748B] mb-0.5">Hora</p>
                   <p className="text-[#1E293B]">{pedido.hora}</p>
                 </div>
