@@ -9,7 +9,9 @@ import { Dashboard } from "./components/Dashboard";
 import { Seguimiento } from "./components/Seguimiento";
 import { ConfiguracionSupabase } from "./components/ConfiguracionSupabase";
 import { initializePedidos } from "./utils/pedidos";
+import { obtenerOrdenesPayed } from "./supabase/actions/pedidos";
 import { setEstadoCocina } from "./utils/cocina";
+import { obtenerTelefonoUsuario } from "./utils/url";
 import { Toaster } from "./components/ui/sonner";
 import { SupabaseStatus } from "./components/SupabaseStatus";
 
@@ -40,19 +42,29 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    // Contar órdenes pendientes (solo NUEVO)
-    const calcularPendientes = () => {
+    // Contar órdenes con status PAYED desde Supabase
+    const calcularPendientes = async () => {
       try {
-        const pedidosData = localStorage.getItem('pedidos');
-        if (pedidosData) {
-          const pedidos = JSON.parse(pedidosData);
-          const pendientes = pedidos.filter((p: any) => 
-            p.estado === 'NUEVO'
-          ).length;
-          setOrdenesPendientes(pendientes);
-        }
+        const userPhone = obtenerTelefonoUsuario();
+        const pendientes = await obtenerOrdenesPayed(userPhone);
+        console.log("pendientes", pendientes)
+        setOrdenesPendientes(pendientes);
       } catch (error) {
-        console.error("Error contando pendientes:", error);
+        console.error("Error contando órdenes PAYED desde Supabase:", error);
+        // Fallback a localStorage
+        try {
+          const pedidosData = localStorage.getItem('pedidos');
+          if (pedidosData) {
+            const pedidos = JSON.parse(pedidosData);
+            const pendientes = pedidos.filter((p: any) => 
+              p.estado === 'NUEVO'
+            ).length;
+            setOrdenesPendientes(pendientes);
+          }
+        } catch (fallbackError) {
+          console.error("Error en fallback:", fallbackError);
+          setOrdenesPendientes(0);
+        }
       }
     };
 
@@ -84,6 +96,7 @@ export default function App() {
     { id: "seguimiento" as Vista, nombre: "Seguimiento", icon: MapPin },
     { id: "configuracion" as Vista, nombre: "Supabase", icon: Settings }
   ];
+console.log("ordenesPendientes", ordenesPendientes)
 
   return (
     <div className="min-h-screen bg-gray-50">

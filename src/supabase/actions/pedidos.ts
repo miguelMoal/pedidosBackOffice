@@ -274,6 +274,28 @@ export async function crearPedido(pedido: Omit<Pedido, 'id' | 'timestamp' | 'hor
   }
 }
 
+// Obtener solo órdenes con status PAYED para el contador
+export async function obtenerOrdenesPayed(userPhone: string): Promise<number> {
+  console.log("userPhone", userPhone)
+  try {
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('id')
+      .eq('user_phone', userPhone)
+      .eq('status', 'PAYED');
+
+    if (error) {
+      console.error('Error obteniendo órdenes PAYED:', error);
+      throw error;
+    }
+
+    return orders?.length || 0;
+  } catch (error) {
+    console.error('Error en obtenerOrdenesPayed:', error);
+    throw error;
+  }
+}
+
 // Obtener un pedido específico por ID y usuario
 export async function obtenerPedidoPorId(id: string, userPhone: string): Promise<Pedido | null> {
   try {
