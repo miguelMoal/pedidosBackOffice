@@ -27,15 +27,16 @@ function mapearProductoLocalASupabase(producto: Producto) {
 
 // Mapear producto de Supabase a formato local
 function mapearProductoSupabaseALocal(productoSupabase: any): Producto {
+  console.log('Mapeando producto:', productoSupabase);
   return {
     id: productoSupabase.id.toString(),
-    nombre: productoSupabase.name,
+    nombre: productoSupabase.name || '',
     categoria: "Comida", // Por defecto, ya que Supabase no tiene categoría
-    costo: productoSupabase.cost || 0, // Usar el costo de Supabase
-    precio: productoSupabase.price,
-    imagen: productoSupabase.image_url,
+    costo: Number(productoSupabase.cost) || 0, // Convertir a número y usar 0 si es null/undefined
+    precio: Number(productoSupabase.price) || 0, // Convertir a número y usar 0 si es null/undefined
+    imagen: productoSupabase.image_url || '',
     activo: true, // Por defecto activo
-    stock: productoSupabase.stock || 0 // Usar el stock de Supabase
+    stock: Number(productoSupabase.stock) || 0 // Convertir a número y usar 0 si es null/undefined
   };
 }
 
@@ -83,7 +84,7 @@ export async function getTodosProductosAsync(): Promise<Producto[]> {
     try {
       const { data: productosSupabase, error } = await supabase
         .from('products')
-        .select('id, name, price, cost, margin, stock, image_url, business, created_at')
+        .select('*')
         .eq('business', 'PUESTO')
         .order('created_at', { ascending: false });
 
@@ -94,6 +95,10 @@ export async function getTodosProductosAsync(): Promise<Producto[]> {
 
       // Mapear productos de Supabase a formato local
       const productosLocales = productosSupabase?.map(mapearProductoSupabaseALocal) || [];
+      
+      // Debug: verificar datos de Supabase
+      console.log('Productos de Supabase:', productosSupabase);
+      console.log('Productos mapeados:', productosLocales);
       
       // Verificar si hay productos que necesitan actualización de campos faltantes
       const productosParaActualizar = productosLocales.filter(p => 
