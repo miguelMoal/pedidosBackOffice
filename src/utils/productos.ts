@@ -5,11 +5,20 @@ import { supabase } from '../supabase/initSupabase';
 // Flag para controlar si usar Supabase o localStorage
 const USE_SUPABASE = true;
 
+// Función para recalcular el margen basado en precio y costo
+function calcularMargen(precio: number, costo: number): string {
+  if (precio === 0) return "0.00";
+  return ((precio - costo) / precio * 100).toFixed(2);
+}
+
 // Mapear producto local a formato Supabase
 function mapearProductoLocalASupabase(producto: Producto) {
   return {
     name: producto.nombre,
     price: producto.precio,
+    cost: producto.costo,
+    margin: calcularMargen(producto.precio, producto.costo), // Calcular margen como porcentaje
+    stock: producto.stock,
     image_url: producto.imagen,
     business: 'PUESTO' as const, // Por defecto para el backoffice
     // Nota: Supabase maneja id y created_at automáticamente
@@ -22,11 +31,11 @@ function mapearProductoSupabaseALocal(productoSupabase: any): Producto {
     id: productoSupabase.id.toString(),
     nombre: productoSupabase.name,
     categoria: "Comida", // Por defecto, ya que Supabase no tiene categoría
-    costo: 0, // Supabase no tiene costo, usar 0 por defecto
+    costo: productoSupabase.cost || 0, // Usar el costo de Supabase
     precio: productoSupabase.price,
     imagen: productoSupabase.image_url,
     activo: true, // Por defecto activo
-    stock: 0 // Supabase no tiene stock, usar 0 por defecto
+    stock: productoSupabase.stock || 0 // Usar el stock de Supabase
   };
 }
 
@@ -74,7 +83,7 @@ export async function getTodosProductosAsync(): Promise<Producto[]> {
     try {
       const { data: productosSupabase, error } = await supabase
         .from('products')
-        .select('*')
+        .select('id, name, price, cost, margin, stock, image_url, business, created_at')
         .eq('business', 'PUESTO')
         .order('created_at', { ascending: false });
 
@@ -85,6 +94,16 @@ export async function getTodosProductosAsync(): Promise<Producto[]> {
 
       // Mapear productos de Supabase a formato local
       const productosLocales = productosSupabase?.map(mapearProductoSupabaseALocal) || [];
+      
+      // Verificar si hay productos que necesitan actualización de campos faltantes
+      const productosParaActualizar = productosLocales.filter(p => 
+        p.costo === 0 && p.stock === 0 // Productos que pueden no tener los nuevos campos
+      );
+      
+      if (productosParaActualizar.length > 0) {
+        console.log('Sincronizando productos con campos faltantes...');
+        // Los productos se actualizarán automáticamente cuando se editen
+      }
       
       // Sincronizar con localStorage para fallback
       localStorage.setItem("productos", JSON.stringify(productosLocales));
@@ -148,6 +167,9 @@ export async function guardarProductosAsync(productos: Producto[]) {
           .update({
             name: producto.name,
             price: producto.price,
+            cost: producto.cost,
+            margin: producto.margin,
+            stock: producto.stock,
             image_url: producto.image_url
           })
           .eq('id', producto.id);
@@ -233,7 +255,14 @@ export async function actualizarProductoAsync(producto: Producto): Promise<Produ
       
       const { data: productoActualizado, error } = await supabase
         .from('products')
-        .update(productoMapeado)
+        .update({
+          name: productoMapeado.name,
+          price: productoMapeado.price,
+          cost: productoMapeado.cost,
+          margin: productoMapeado.margin,
+          stock: productoMapeado.stock,
+          image_url: productoMapeado.image_url
+        })
         .eq('id', idNumerico)
         .select()
         .single();

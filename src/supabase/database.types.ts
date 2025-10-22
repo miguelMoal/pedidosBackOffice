@@ -147,41 +147,32 @@ export type Database = {
       orders: {
         Row: {
           confirmation_code: string | null
-          cost: number
           coupon_applied: number | null
           created_at: string
           id: number
-          margin: number
           order_type: Database["public"]["Enums"]["ORDER_TYPE"] | null
           price: number | null
           status: Database["public"]["Enums"]["STATUS_ORDER"]
-          stock: number
           user_phone: string
         }
         Insert: {
           confirmation_code?: string | null
-          cost: number
           coupon_applied?: number | null
           created_at?: string
           id?: number
-          margin: number
           order_type?: Database["public"]["Enums"]["ORDER_TYPE"] | null
           price?: number | null
           status?: Database["public"]["Enums"]["STATUS_ORDER"]
-          stock: number
           user_phone: string
         }
         Update: {
           confirmation_code?: string | null
-          cost?: number
           coupon_applied?: number | null
           created_at?: string
           id?: number
-          margin?: number
           order_type?: Database["public"]["Enums"]["ORDER_TYPE"] | null
           price?: number | null
           status?: Database["public"]["Enums"]["STATUS_ORDER"]
-          stock?: number
           user_phone?: string
         }
         Relationships: [
@@ -204,27 +195,36 @@ export type Database = {
       products: {
         Row: {
           business: Database["public"]["Enums"]["BUSINESS_TYPE"]
+          cost: number
           created_at: string
           id: number
           image_url: string
+          margin: number
           name: string
           price: number
+          stock: number
         }
         Insert: {
           business?: Database["public"]["Enums"]["BUSINESS_TYPE"]
+          cost?: number
           created_at?: string
           id?: number
           image_url: string
+          margin?: number
           name: string
           price: number
+          stock?: number
         }
         Update: {
           business?: Database["public"]["Enums"]["BUSINESS_TYPE"]
+          cost?: number
           created_at?: string
           id?: number
           image_url?: string
+          margin?: number
           name?: string
           price?: number
+          stock?: number
         }
         Relationships: []
       }
