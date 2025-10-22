@@ -1,8 +1,7 @@
 import { supabase } from '../initSupabase';
-import { Database } from '../database.types';
 
 type EstadoPedido = "NUEVO" | "PREPARANDO" | "LISTO" | "ENTREGADO";
-type EstadoSupabase = Database['public']['Enums']['STATUS_ORDER'];
+type EstadoSupabase = "INIT" | "IN_PROGRESS" | "READY" | "DELIVERED" | "PAYED";
 
 // Mapeo entre estados locales y de Supabase
 const MAPEO_ESTADOS: Record<EstadoSupabase, EstadoPedido> = {
@@ -20,6 +19,7 @@ const MAPEO_ESTADOS_INVERSO: Record<EstadoPedido, EstadoSupabase> = {
   'ENTREGADO': 'DELIVERED'
 };
 
+
 export interface ItemPedido {
   id: string;
   nombre: string;
@@ -32,6 +32,7 @@ export interface Pedido {
   id: string;
   estado: EstadoPedido;
   items: ItemPedido[];
+  subtotal: number;
   total: number;
   hora: string;
   tipo: "Delivery" | "Recoger";
@@ -41,6 +42,11 @@ export interface Pedido {
     nombre: string;
     foto: string;
   };
+  cupon?: {
+    codigo: string;
+    descuento: number;
+  };
+  precioEnvio?: number;
 }
 
 // Obtener todos los pedidos de Supabase para un usuario específico
@@ -56,6 +62,16 @@ export async function obtenerPedidos(userPhone: string): Promise<Pedido[]> {
         status,
         created_at,
         user_phone,
+        price,
+        coupon_applied,
+        coupons (
+          code,
+          discount
+        ),
+        send_price (
+          id,
+          price
+        ),
         item_order (
           quantity,
           products (
@@ -96,13 +112,31 @@ export async function obtenerPedidos(userPhone: string): Promise<Pedido[]> {
         imagen: item.products?.image_url
       })).filter(item => item.id && item.nombre) || [];
 
-      const total = items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+      const subtotal = items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
       const nombreUsuario = usuariosMap.get(order.user_phone) || 'Cliente';
+      
+      // Información del cupón si existe
+      const cupon = order.coupon_applied && order.coupons ? {
+        codigo: order.coupons.code,
+        descuento: order.coupons.discount
+      } : undefined;
+      
+      // Obtener precio de envío específico del pedido
+      const precioEnvio = order.send_price?.price || 20; // Fallback a $20 si no hay precio
+      
+      // Calcular total considerando cupón y envío
+      let total = subtotal;
+      if (cupon) {
+        total -= cupon.descuento;
+      }
+      // Agregar precio de envío
+      total += precioEnvio;
       
       return {
         id: order.id.toString(),
-        estado: MAPEO_ESTADOS[order.status],
+        estado: MAPEO_ESTADOS[order.status as EstadoSupabase] || 'NUEVO',
         items,
+        subtotal,
         total,
         hora: new Date(order.created_at).toLocaleTimeString('es-MX', { 
           hour: '2-digit', 
@@ -113,7 +147,9 @@ export async function obtenerPedidos(userPhone: string): Promise<Pedido[]> {
         usuario: {
           nombre: nombreUsuario,
           foto: `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreUsuario)}&background=random`
-        }
+        },
+        cupon,
+        precioEnvio
       };
     });
 
@@ -207,6 +243,16 @@ export async function obtenerPedidoPorId(id: string, userPhone: string): Promise
         status,
         created_at,
         user_phone,
+        price,
+        coupon_applied,
+        coupons (
+          code,
+          discount
+        ),
+        send_price (
+          id,
+          price
+        ),
         item_order (
           quantity,
           products (
@@ -246,12 +292,30 @@ export async function obtenerPedidoPorId(id: string, userPhone: string): Promise
       imagen: item.products?.image_url
     })).filter(item => item.id && item.nombre) || [];
 
-    const total = items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+    const subtotal = items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+    
+    // Información del cupón si existe
+    const cupon = order.coupon_applied && order.coupons ? {
+      codigo: order.coupons.code,
+      descuento: order.coupons.discount
+    } : undefined;
+    
+    // Obtener precio de envío específico del pedido
+    const precioEnvio = order.send_price?.price || 20; // Fallback a $20 si no hay precio
+    
+    // Calcular total considerando cupón y envío
+    let total = subtotal;
+    if (cupon) {
+      total -= cupon.descuento;
+    }
+    // Agregar precio de envío
+    total += precioEnvio;
     
     return {
       id: order.id.toString(),
-      estado: MAPEO_ESTADOS[order.status],
+      estado: MAPEO_ESTADOS[order.status as EstadoSupabase] || 'NUEVO',
       items,
+      subtotal,
       total,
       hora: new Date(order.created_at).toLocaleTimeString('es-MX', { 
         hour: '2-digit', 
@@ -262,7 +326,9 @@ export async function obtenerPedidoPorId(id: string, userPhone: string): Promise
       usuario: {
         nombre: user?.name || 'Cliente',
         foto: `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Cliente')}&background=random`
-      }
+      },
+      cupon,
+      precioEnvio
     };
   } catch (error) {
     console.error('Error en obtenerPedidoPorId:', error);

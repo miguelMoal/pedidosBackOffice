@@ -24,6 +24,7 @@ export interface Pedido {
   id: string;
   estado: EstadoPedido;
   items: ItemPedido[];
+  subtotal: number;
   total: number;
   hora: string;
   tipo: "Delivery" | "Recoger";
@@ -33,6 +34,11 @@ export interface Pedido {
     nombre: string;
     foto: string;
   };
+  cupon?: {
+    codigo: string;
+    descuento: number;
+  };
+  precioEnvio?: number;
 }
 
 // Flag para controlar si usar Supabase o localStorage
@@ -48,7 +54,9 @@ export async function initializePedidos() {
         { id: "p1", nombre: "Hot Dog", cantidad: 2, precio: 60, imagen: "https://images.unsplash.com/photo-1598209570763-cd3013fadf7e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400" },
         { id: "p5", nombre: "Flashlyte", cantidad: 1, precio: 35, imagen: "https://images.unsplash.com/photo-1648313021325-d81f28d57824?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400" }
       ],
-      total: 155,
+      subtotal: 155,
+      total: 175,
+      precioEnvio: 20,
       hora: new Date(ahora - 1 * 60000).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
       tipo: "Delivery",
       timestamp: ahora - 1 * 60000,
@@ -64,6 +72,7 @@ export async function initializePedidos() {
         { id: "p3", nombre: "Nachos", cantidad: 1, precio: 55, imagen: "https://images.unsplash.com/photo-1669624272709-c5b91f66b1b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400" },
         { id: "p4", nombre: "Coca-Cola", cantidad: 2, precio: 30, imagen: "https://images.unsplash.com/photo-1594881798661-4c77c99551a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400" }
       ],
+      subtotal: 115,
       total: 115,
       hora: new Date(ahora - 2 * 60000).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
       tipo: "Recoger",
@@ -81,7 +90,9 @@ export async function initializePedidos() {
         { id: "p2", nombre: "Pizza Slice", cantidad: 3, precio: 50, imagen: "https://images.unsplash.com/photo-1544982503-9f984c14501a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400" },
         { id: "p7", nombre: "Sprite", cantidad: 1, precio: 30, imagen: "https://images.unsplash.com/photo-1570633141712-9c519e90b85c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400" }
       ],
-      total: 180,
+      subtotal: 180,
+      total: 200,
+      precioEnvio: 20,
       hora: new Date(ahora - 3 * 60000).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
       tipo: "Delivery",
       timestamp: ahora - 3 * 60000,
@@ -97,6 +108,7 @@ export async function initializePedidos() {
         { id: "p9", nombre: "Papas Fritas", cantidad: 2, precio: 45, imagen: "https://images.unsplash.com/photo-1630431341973-02e1b662ec35?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400" },
         { id: "p6", nombre: "Agua", cantidad: 2, precio: 25, imagen: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400" }
       ],
+      subtotal: 140,
       total: 140,
       hora: new Date(ahora - 5 * 60000).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
       tipo: "Recoger",
@@ -114,7 +126,13 @@ export async function initializePedidos() {
         { id: "p8", nombre: "Doritos", cantidad: 2, precio: 28, imagen: "https://images.unsplash.com/photo-1704656296628-794703d8a727?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400" },
         { id: "p4", nombre: "Coca-Cola", cantidad: 1, precio: 30, imagen: "https://images.unsplash.com/photo-1594881798661-4c77c99551a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400" }
       ],
-      total: 146,
+      subtotal: 146,
+      total: 156,
+      precioEnvio: 20,
+      cupon: {
+        codigo: "DESCUENTO10",
+        descuento: 10
+      },
       hora: new Date(ahora - 8 * 60000).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
       tipo: "Delivery",
       nota: "Asiento: Sección A, Fila 12",
@@ -131,7 +149,9 @@ export async function initializePedidos() {
         { id: "p2", nombre: "Pizza Slice", cantidad: 2, precio: 50, imagen: "https://images.unsplash.com/photo-1544982503-9f984c14501a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400" },
         { id: "p5", nombre: "Flashlyte", cantidad: 2, precio: 35, imagen: "https://images.unsplash.com/photo-1648313021325-d81f28d57824?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400" }
       ],
-      total: 170,
+      subtotal: 170,
+      total: 190,
+      precioEnvio: 20,
       hora: new Date(ahora - 12 * 60000).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
       tipo: "Delivery",
       timestamp: ahora - 12 * 60000,
@@ -265,8 +285,23 @@ export function generarIdPedido(): string {
   return `Q${num}`;
 }
 
-export function calcularTotal(items: ItemPedido[]): number {
+export function calcularSubtotal(items: ItemPedido[]): number {
   return items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+}
+
+export function calcularTotal(subtotal: number, cupon?: { descuento: number }, precioEnvio?: number): number {
+  let total = subtotal;
+  
+  // Aplicar descuento del cupón
+  if (cupon) {
+    total -= cupon.descuento;
+  }
+  
+  // Agregar precio de envío (si no se proporciona, usar 20 como valor por defecto)
+  const envio = precioEnvio || 20;
+  total += envio;
+  
+  return Math.max(0, total); // Asegurar que el total no sea negativo
 }
 
 export function getEstadoInfo(estado: EstadoPedido): { color: string; texto: string } {

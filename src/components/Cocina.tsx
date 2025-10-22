@@ -81,7 +81,8 @@ export function Cocina() {
       setTimeout(() => setContadorAnimando(null), 1000);
       
       // Mostrar toast de confirmación
-      const mensajes = {
+      const mensajes: Record<EstadoPedido, string> = {
+        NUEVO: "🆕 Nuevo pedido",
         PREPARANDO: "🍳 Pedido en preparación",
         LISTO: "✅ Pedido listo para entregar",
         ENTREGADO: "📦 Pedido entregado"
@@ -310,7 +311,15 @@ export function Cocina() {
                       <span>•</span>
                       <span>{pedido.tipo}</span>
                       <span>•</span>
-                      <span className="text-[#FF6B00]">${pedido.total} MXN</span>
+                      <div className="flex flex-col items-end">
+                        <span className="text-[#FF6B00] font-semibold">${pedido.total} MXN</span>
+                        {pedido.cupon && (
+                          <span className="text-xs text-green-600">-${pedido.cupon.descuento} cupón</span>
+                        )}
+                        {pedido.precioEnvio && (
+                          <span className="text-xs text-gray-500">+${pedido.precioEnvio} envío</span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Vista rápida de items */}
@@ -416,9 +425,27 @@ export function Cocina() {
                     </div>
                   ))}
                 </div>
-                <div className="mt-3 pt-3 border-t flex justify-between items-center">
-                  <span className="text-[#1E293B]">Total</span>
-                  <span className="text-[#FF6B00]">${pedidoSeleccionado.total} MXN</span>
+                <div className="mt-3 pt-3 border-t space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#1E293B]">Subtotal</span>
+                    <span className="text-[#1E293B]">${pedidoSeleccionado.subtotal} MXN</span>
+                  </div>
+                  {pedidoSeleccionado.cupon && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-green-600">Descuento ({pedidoSeleccionado.cupon.codigo})</span>
+                      <span className="text-green-600">-${pedidoSeleccionado.cupon.descuento} MXN</span>
+                    </div>
+                  )}
+                  {pedidoSeleccionado.precioEnvio && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-[#64748B]">Envío</span>
+                      <span className="text-[#64748B]">+${pedidoSeleccionado.precioEnvio} MXN</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                    <span className="text-[#1E293B] font-semibold">Total</span>
+                    <span className="text-[#FF6B00] font-semibold text-lg">${pedidoSeleccionado.total} MXN</span>
+                  </div>
                 </div>
               </div>
 
