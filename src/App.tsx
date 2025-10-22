@@ -167,10 +167,10 @@ console.log("ordenesPendientes", ordenesPendientes)
 
               {/* Select de estado del negocio */}
               <Select value={estadoNegocio} onValueChange={cambiarEstadoNegocio}>
-                <SelectTrigger className={`px-4 lg:px-5 py-2.5 lg:py-3 rounded-xl flex items-center gap-2 transition-all min-w-[140px] ${
+                <SelectTrigger className={`px-4 lg:px-5 py-2.5 lg:py-3 rounded-xl flex items-center gap-2 transition-all min-w-[140px] text-white ${
                   estadoNegocio === "cerrado"
-                    ? 'bg-red-500 hover:bg-red-600 text-white'
-                    : 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                    ? 'bg-red-500 hover:bg-red-600'
+                    : 'bg-emerald-500 hover:bg-emerald-600'
                 }`}>
                   <SelectValue>
                     <div className="flex items-center gap-2">
