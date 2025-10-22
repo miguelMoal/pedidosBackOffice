@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { Search, Eye, Trash2, Download, Filter } from "lucide-react";
+import { Search, Eye, Trash2, Download } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
-import { getTodosPedidos, getTodosPedidosAsync, actualizarEstadoPedido, type Pedido, type EstadoPedido, getEstadoInfo } from "../utils/pedidos";
+import { getTodosPedidos, actualizarEstadoPedido, type Pedido, type EstadoPedido, getEstadoInfo } from "../utils/pedidos";
+import { obtenerPedidos, actualizarEstadoPedido as actualizarEstadoPedidoSupabase } from "../supabase/actions/pedidos";
+import { obtenerTelefonoUsuario } from "../utils/url";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 export function PedidosBackoffice() {
@@ -13,16 +15,31 @@ export function PedidosBackoffice() {
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
   const [pedidoSeleccionado, setPedidoSeleccionado] = useState<Pedido | null>(null);
   const [dialogAbierto, setDialogAbierto] = useState(false);
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const cargarPedidos = async () => {
     try {
-      const todosPedidos = await getTodosPedidosAsync();
+      setCargando(true);
+      setError(null);
+      
+      const userPhone = obtenerTelefonoUsuario();
+      const todosPedidos = await obtenerPedidos(userPhone);
       setPedidos(todosPedidos);
     } catch (error) {
       console.error("Error cargando pedidos:", error);
+      setError("Error al cargar los pedidos. Usando datos locales como respaldo.");
+      
       // Fallback a localStorage
-      const todosPedidos = getTodosPedidos();
-      setPedidos(todosPedidos);
+      try {
+        const todosPedidos = getTodosPedidos();
+        setPedidos(todosPedidos);
+      } catch (fallbackError) {
+        console.error("Error en fallback:", fallbackError);
+        setError("No se pudieron cargar los pedidos.");
+      }
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -53,11 +70,42 @@ export function PedidosBackoffice() {
     setDialogAbierto(true);
   };
 
-  const cambiarEstado = (id: string, nuevoEstado: EstadoPedido) => {
-    actualizarEstadoPedido(id, nuevoEstado);
-    cargarPedidos();
-    if (pedidoSeleccionado && pedidoSeleccionado.id === id) {
-      setPedidoSeleccionado({ ...pedidoSeleccionado, estado: nuevoEstado });
+  const cambiarEstado = async (id: string, nuevoEstado: EstadoPedido) => {
+    try {
+      setCargando(true);
+      setError(null);
+      
+      const userPhone = obtenerTelefonoUsuario();
+      await actualizarEstadoPedidoSupabase(id, nuevoEstado, userPhone);
+      
+      // Actualizar estado local inmediatamente
+      setPedidos(prev => prev.map(p => 
+        p.id === id ? { ...p, estado: nuevoEstado } : p
+      ));
+      
+      if (pedidoSeleccionado && pedidoSeleccionado.id === id) {
+        setPedidoSeleccionado({ ...pedidoSeleccionado, estado: nuevoEstado });
+      }
+      
+      // Disparar evento para actualizar otras secciones
+      window.dispatchEvent(new CustomEvent('pedidosActualizados'));
+    } catch (error) {
+      console.error("Error actualizando estado:", error);
+      setError("Error al actualizar el estado del pedido. Intentando con datos locales.");
+      
+      // Fallback a actualización local
+      try {
+        actualizarEstadoPedido(id, nuevoEstado);
+        cargarPedidos();
+        if (pedidoSeleccionado && pedidoSeleccionado.id === id) {
+          setPedidoSeleccionado({ ...pedidoSeleccionado, estado: nuevoEstado });
+        }
+      } catch (fallbackError) {
+        console.error("Error en fallback de actualización:", fallbackError);
+        setError("No se pudo actualizar el estado del pedido.");
+      }
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -149,73 +197,93 @@ export function PedidosBackoffice() {
         </div>
       </div>
 
+      {/* Mensaje de error */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
       {/* Tabla de pedidos */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Indicador de carga */}
+        {cargando && (
+          <div className="flex items-center justify-center py-8">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 border-2 border-[#012B67] border-t-transparent rounded-full animate-spin" />
+              <span className="text-[#64748B]">Cargando pedidos...</span>
+            </div>
+          </div>
+        )}
+
         {/* Vista de tabla para desktop */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-4 text-left text-sm text-[#64748B]">ID</th>
-                <th className="px-6 py-4 text-left text-sm text-[#64748B]">Cliente</th>
-                <th className="px-6 py-4 text-left text-sm text-[#64748B]">Total</th>
-                <th className="px-6 py-4 text-left text-sm text-[#64748B]">Estado</th>
-                <th className="px-6 py-4 text-left text-sm text-[#64748B]">Tipo</th>
-                <th className="px-6 py-4 text-left text-sm text-[#64748B]">Hora</th>
-                <th className="px-6 py-4 text-left text-sm text-[#64748B]">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {pedidosFiltrados.map((pedido) => (
-                <tr key={pedido.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <span className="text-[#1E293B]">#{pedido.id}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <img 
-                        src={pedido.usuario.foto} 
-                        alt={pedido.usuario.nombre}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                      <span className="text-[#1E293B]">{pedido.usuario.nombre}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-[#FE7F1E]">${pedido.total}</td>
-                  <td className="px-6 py-4">
-                    <Badge className={getEstadoInfo(pedido.estado).color}>
-                      {getEstadoInfo(pedido.estado).texto}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-4 text-[#64748B]">{pedido.tipo}</td>
-                  <td className="px-6 py-4 text-[#64748B]">{pedido.hora}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => abrirDetalle(pedido)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => eliminarPedido(pedido.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </td>
+        {!cargando && (
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm text-[#64748B]">ID</th>
+                  <th className="px-6 py-4 text-left text-sm text-[#64748B]">Cliente</th>
+                  <th className="px-6 py-4 text-left text-sm text-[#64748B]">Total</th>
+                  <th className="px-6 py-4 text-left text-sm text-[#64748B]">Estado</th>
+                  <th className="px-6 py-4 text-left text-sm text-[#64748B]">Tipo</th>
+                  <th className="px-6 py-4 text-left text-sm text-[#64748B]">Hora</th>
+                  <th className="px-6 py-4 text-left text-sm text-[#64748B]">Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {pedidosFiltrados.map((pedido) => (
+                  <tr key={pedido.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <span className="text-[#1E293B]">#{pedido.id}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src={pedido.usuario.foto} 
+                          alt={pedido.usuario.nombre}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                        <span className="text-[#1E293B]">{pedido.usuario.nombre}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-[#FE7F1E]">${pedido.total}</td>
+                    <td className="px-6 py-4">
+                      <Badge className={getEstadoInfo(pedido.estado).color}>
+                        {getEstadoInfo(pedido.estado).texto}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 text-[#64748B]">{pedido.tipo}</td>
+                    <td className="px-6 py-4 text-[#64748B]">{pedido.hora}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => abrirDetalle(pedido)}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => eliminarPedido(pedido.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* Vista de tarjetas para móvil */}
-        <div className="md:hidden divide-y divide-gray-100">
+        {!cargando && (
+          <div className="md:hidden divide-y divide-gray-100">
           {pedidosFiltrados.map((pedido) => (
             <div key={pedido.id} className="p-4 hover:bg-gray-50 transition-colors">
               {/* Header de la tarjeta */}
@@ -272,9 +340,10 @@ export function PedidosBackoffice() {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
 
-        {pedidosFiltrados.length === 0 && (
+        {!cargando && pedidosFiltrados.length === 0 && (
           <div className="p-8 text-center text-[#64748B]">
             No se encontraron pedidos
           </div>
@@ -312,21 +381,27 @@ export function PedidosBackoffice() {
               {/* Cambiar estado */}
               <div className="p-4 bg-blue-50 rounded-xl">
                 <label className="text-sm text-[#64748B] block mb-2">Cambiar estado del pedido</label>
-                <Select 
-                  value={pedidoSeleccionado.estado} 
-                  onValueChange={(value) => cambiarEstado(pedidoSeleccionado.id, value as EstadoPedido)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="NUEVO">Nuevo</SelectItem>
-                    <SelectItem value="PREPARANDO">Preparando</SelectItem>
-                    <SelectItem value="LISTO">Listo</SelectItem>
-                    <SelectItem value="EN_CAMINO">En camino</SelectItem>
-                    <SelectItem value="ENTREGADO">Entregado</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center gap-2">
+                  <Select 
+                    value={pedidoSeleccionado.estado} 
+                    onValueChange={(value) => cambiarEstado(pedidoSeleccionado.id, value as EstadoPedido)}
+                    disabled={cargando}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="NUEVO">Nuevo</SelectItem>
+                      <SelectItem value="PREPARANDO">Preparando</SelectItem>
+                      <SelectItem value="LISTO">Listo</SelectItem>
+                      <SelectItem value="EN_CAMINO">En camino</SelectItem>
+                      <SelectItem value="ENTREGADO">Entregado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {cargando && (
+                    <div className="w-5 h-5 border-2 border-[#012B67] border-t-transparent rounded-full animate-spin" />
+                  )}
+                </div>
               </div>
 
               {/* Productos */}
