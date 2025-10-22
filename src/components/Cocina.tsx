@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { ChefHat, Clock, Eye, CheckCircle2, PlayCircle, Package, Bell, Car } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { Input } from "./ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { getTodosPedidos, getTodosPedidosAsync, actualizarEstadoPedido, getEstadoInfo, type Pedido, type EstadoPedido } from "../utils/pedidos";
 import { obtenerTelefonoUsuario } from "../utils/url";
+import { supabase } from "../supabase/initSupabase";
 import { toast } from "sonner@2.0.3";
 
 type Filtro = "todos" | "NUEVO" | "PREPARANDO" | "LISTO" | "EN_CAMINO" | "ENTREGADO";
@@ -16,6 +18,9 @@ export function Cocina() {
   const [dialogAbierto, setDialogAbierto] = useState(false);
   const [pedidoAnimando, setPedidoAnimando] = useState<string | null>(null);
   const [contadorAnimando, setContadorAnimando] = useState<EstadoPedido | null>(null);
+  const [mostrarVerificacion, setMostrarVerificacion] = useState(false);
+  const [codigoVerificacion, setCodigoVerificacion] = useState("");
+  const [pedidoParaEntregar, setPedidoParaEntregar] = useState<Pedido | null>(null);
 
   const cargarPedidos = async () => {
     try {
@@ -61,6 +66,16 @@ export function Cocina() {
   };
 
   const cambiarEstadoPedido = async (id: string, nuevoEstado: EstadoPedido) => {
+    // Si se intenta marcar como entregado, mostrar modal de verificación
+    if (nuevoEstado === "ENTREGADO") {
+      const pedido = pedidos.find(p => p.id === id);
+      if (pedido) {
+        setPedidoParaEntregar(pedido);
+        setMostrarVerificacion(true);
+        return;
+      }
+    }
+
     // Activar animación
     setPedidoAnimando(id);
     
@@ -99,6 +114,88 @@ export function Cocina() {
         setPedidoSeleccionado({ ...pedidoSeleccionado, estado: nuevoEstado });
       }
     }, 500);
+  };
+
+  const verificarCodigo = async () => {
+    console.log("Código ingresado:", codigoVerificacion);
+    console.log("Pedido ID:", pedidoParaEntregar?.id);
+    
+    if (!pedidoParaEntregar || !codigoVerificacion.trim()) {
+      toast.error("Por favor ingresa el código de verificación");
+      return;
+    }
+
+    try {
+      // Validar el código contra Supabase
+      const userPhone = obtenerTelefonoUsuario();
+      const { data: order, error } = await supabase
+        .from('orders')
+        .select('confirmation_code')
+        .eq('id', parseInt(pedidoParaEntregar.id))
+        .eq('user_phone', userPhone)
+        .single();
+
+      if (error) {
+        console.error('Error obteniendo código de confirmación:', error);
+        toast.error("Error validando el código", {
+          description: "No se pudo verificar el código de confirmación",
+          duration: 3000,
+        });
+        return;
+      }
+
+      const codigoCorrecto = order?.confirmation_code === codigoVerificacion.trim();
+      console.log("Código en BD:", order?.confirmation_code);
+      console.log("Código ingresado:", codigoVerificacion.trim());
+      console.log("Código correcto:", codigoCorrecto);
+      
+      if (codigoCorrecto) {
+        // Cerrar modal primero
+        setMostrarVerificacion(false);
+        setCodigoVerificacion("");
+        setPedidoParaEntregar(null);
+        
+        // Actualizar el estado directamente sin pasar por la validación de ENTREGADO
+        try {
+          const userPhone = obtenerTelefonoUsuario();
+          await actualizarEstadoPedido(pedidoParaEntregar.id, "ENTREGADO", userPhone);
+          await cargarPedidos();
+          
+          // Actualizar pedido seleccionado si está abierto
+          if (pedidoSeleccionado && pedidoSeleccionado.id === pedidoParaEntregar.id) {
+            setPedidoSeleccionado({ ...pedidoSeleccionado, estado: "ENTREGADO" });
+          }
+          
+          toast.success("Código verificado correctamente", {
+            description: "Pedido marcado como entregado",
+            duration: 3000,
+          });
+        } catch (error) {
+          console.error('Error actualizando estado:', error);
+          toast.error("Error actualizando el pedido", {
+            description: "El código fue correcto pero hubo un error al actualizar",
+            duration: 3000,
+          });
+        }
+      } else {
+        toast.error("Código de verificación inválido", {
+          description: "El código ingresado no coincide con el código de confirmación",
+          duration: 3000,
+        });
+      }
+    } catch (error) {
+      console.error('Error en verificación:', error);
+      toast.error("Error validando el código", {
+        description: "Ocurrió un error al verificar el código",
+        duration: 3000,
+      });
+    }
+  };
+
+  const cancelarVerificacion = () => {
+    setMostrarVerificacion(false);
+    setCodigoVerificacion("");
+    setPedidoParaEntregar(null);
   };
 
   const obtenerSiguienteEstado = (estadoActual: EstadoPedido): { estado: EstadoPedido; texto: string; icono: any; color: string } | null => {
@@ -519,6 +616,69 @@ export function Cocina() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de verificación de código */}
+      <Dialog open={mostrarVerificacion} onOpenChange={setMostrarVerificacion}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Verificación de entrega</DialogTitle>
+            <DialogDescription>
+              Ingresa el código de verificación para confirmar la entrega del pedido #{pedidoParaEntregar?.id}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-[#1E293B] mb-2 block">
+                Código de verificación
+              </label>
+              <Input
+                type="text"
+                placeholder="Ingresa el código"
+                value={codigoVerificacion}
+                onChange={(e) => setCodigoVerificacion(e.target.value)}
+                className="w-full"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    verificarCodigo();
+                  }
+                }}
+              />
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={verificarCodigo}
+                disabled={!codigoVerificacion.trim()}
+                className={`flex-1 px-4 py-3 rounded-lg text-white font-semibold text-base ${
+                  codigoVerificacion.trim() 
+                    ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer shadow-md' 
+                    : 'bg-gray-500 cursor-not-allowed'
+                }`}
+                style={{
+                  backgroundColor: codigoVerificacion.trim() ? '#2563eb' : '#6b7280',
+                  border: 'none',
+                  outline: 'none'
+                }}
+              >
+                {/* <CheckCircle2 className="w-5 h-5 mr-2 inline" /> */}
+                Verificar y entregar
+              </button>
+              <button
+                onClick={cancelarVerificacion}
+                className="flex-1 px-4 py-3 rounded-lg border-2 border-gray-400 bg-white hover:bg-gray-100 text-gray-800 font-semibold text-base"
+                style={{
+                  borderColor: '#9ca3af',
+                  color: '#1f2937'
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
