@@ -158,6 +158,13 @@ export function Inventarios() {
 
   const productosActivos = productos.filter(p => p.activo && p.stock > 0).length;
   const valorInventario = productos.reduce((sum, p) => sum + (p.activo ? p.costo * p.stock : 0), 0);
+
+  const obtenerEstiloStock = (stock: number) => {
+    if (stock === 0) return { backgroundColor: '#ef4444', color: 'white' }; // Rojo
+    if (stock <= 5) return { backgroundColor: '#f97316', color: 'white' }; // Naranja
+    if (stock <= 15) return { backgroundColor: '#eab308', color: 'white' }; // Amarillo
+    return { backgroundColor: '#22c55e', color: 'white' }; // Verde
+  };
   const totalProductos = productos.length;
 
   return (
@@ -266,23 +273,11 @@ export function Inventarios() {
                      <td className="px-6 py-4">
                        <Badge 
                          onClick={() => toggleActivo(producto.id)}
-                         className={`cursor-pointer transition-colors text-white flex items-center gap-1.5 ${
-                           producto.activo && producto.stock > 0
-                             ? 'bg-emerald-500 hover:bg-emerald-600' 
-                             : 'bg-slate-900 hover:bg-slate-800'
-                         }`}
+                         className="cursor-pointer transition-colors flex items-center gap-1.5 px-3 py-1 rounded-full"
+                         style={obtenerEstiloStock(producto.stock)}
                        >
-                         {producto.activo && producto.stock > 0 ? (
-                           <>
-                             <CheckCircle className="w-3.5 h-3.5" />
-                             <span>Disponible</span>
-                           </>
-                         ) : (
-                           <>
-                             <XCircle className="w-3.5 h-3.5" />
-                             <span>{producto.stock === 0 ? 'Agotado' : 'Sin disponibilidad'}</span>
-                           </>
-                         )}
+                         <span className="font-semibold">{producto.stock}</span>
+                         <span>{producto.stock === 0 ? 'Agotado' : 'Disponible'}</span>
                        </Badge>
                      </td>
                     <td className="px-6 py-4">
