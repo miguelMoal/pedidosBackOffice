@@ -147,32 +147,41 @@ export type Database = {
       orders: {
         Row: {
           confirmation_code: string | null
+          cost: number
           coupon_applied: number | null
           created_at: string
           id: number
+          margin: number
           order_type: Database["public"]["Enums"]["ORDER_TYPE"] | null
           price: number | null
           status: Database["public"]["Enums"]["STATUS_ORDER"]
+          stock: number
           user_phone: string
         }
         Insert: {
           confirmation_code?: string | null
+          cost: number
           coupon_applied?: number | null
           created_at?: string
           id?: number
+          margin: number
           order_type?: Database["public"]["Enums"]["ORDER_TYPE"] | null
           price?: number | null
           status?: Database["public"]["Enums"]["STATUS_ORDER"]
+          stock: number
           user_phone: string
         }
         Update: {
           confirmation_code?: string | null
+          cost?: number
           coupon_applied?: number | null
           created_at?: string
           id?: number
+          margin?: number
           order_type?: Database["public"]["Enums"]["ORDER_TYPE"] | null
           price?: number | null
           status?: Database["public"]["Enums"]["STATUS_ORDER"]
+          stock?: number
           user_phone?: string
         }
         Relationships: [

@@ -5,8 +5,8 @@ import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Label } from "./ui/label";
-import { productosData, type Producto as ProductoData } from "../data/productos";
-import { getTodosProductosAsync, guardarProductosAsync, initializeProductos } from "../utils/productos";
+import { productosData } from "../data/productos";
+import { getTodosProductosAsync, initializeProductos, crearProductoAsync, actualizarProductoAsync, eliminarProductoAsync } from "../utils/productos";
 
 interface Producto {
   id: string;
@@ -58,15 +58,6 @@ export function Inventarios() {
     cargarProductos();
   }, []);
 
-  const guardarProductos = async (productosActualizados: Producto[]) => {
-    setProductos(productosActualizados);
-    try {
-      await guardarProductosAsync(productosActualizados);
-    } catch (error) {
-      console.error("Error guardando productos en Supabase:", error);
-      // El error ya fue manejado en guardarProductosAsync con fallback a localStorage
-    }
-  };
 
   const abrirModalNuevo = () => {
     setProductoEditando(null);
@@ -88,50 +79,81 @@ export function Inventarios() {
     setModalAbierto(true);
   };
 
-  const guardarProducto = () => {
+  const guardarProducto = async () => {
     if (!formData.nombre || !formData.precio || !formData.costo) {
       alert("Por favor completa todos los campos");
       return;
     }
 
-    let productosActualizados: Producto[];
-
-    if (productoEditando) {
-      // Editar producto existente
-      productosActualizados = productos.map(p => 
-        p.id === productoEditando.id ? { ...formData as Producto, id: productoEditando.id } : p
-      );
-    } else {
-      // Crear nuevo producto
-      const nuevoProducto: Producto = {
-        id: `p${Date.now()}`,
-        nombre: formData.nombre!,
-        categoria: formData.categoria || "Comida",
-        precio: formData.precio!,
-        costo: formData.costo!,
-        imagen: formData.imagen || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400",
-        activo: formData.activo !== undefined ? formData.activo : true,
-        stock: formData.stock !== undefined ? formData.stock : 0
-      };
-      productosActualizados = [...productos, nuevoProducto];
+    try {
+      if (productoEditando) {
+        // Editar producto existente
+        const productoActualizado: Producto = {
+          ...formData as Producto,
+          id: productoEditando.id
+        };
+        
+        const productoResultado = await actualizarProductoAsync(productoActualizado);
+        
+        // Actualizar la lista local
+        const productosActualizados = productos.map(p => 
+          p.id === productoEditando.id ? productoResultado : p
+        );
+        setProductos(productosActualizados);
+      } else {
+        // Crear nuevo producto
+        const nuevoProducto = {
+          nombre: formData.nombre!,
+          categoria: formData.categoria || "Comida",
+          precio: formData.precio!,
+          costo: formData.costo!,
+          imagen: formData.imagen || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400",
+          activo: formData.activo !== undefined ? formData.activo : true,
+          stock: formData.stock !== undefined ? formData.stock : 0
+        };
+        
+        const productoResultado = await crearProductoAsync(nuevoProducto);
+        
+        // Actualizar la lista local
+        setProductos([...productos, productoResultado]);
+      }
+      
+      setModalAbierto(false);
+    } catch (error) {
+      console.error("Error guardando producto:", error);
+      alert("Error al guardar el producto. Por favor intenta de nuevo.");
     }
-
-    guardarProductos(productosActualizados);
-    setModalAbierto(false);
   };
 
-  const eliminarProducto = (id: string) => {
+  const eliminarProducto = async (id: string) => {
     if (confirm("¿Estás seguro de eliminar este producto?")) {
-      const productosActualizados = productos.filter(p => p.id !== id);
-      guardarProductos(productosActualizados);
+      try {
+        await eliminarProductoAsync(id);
+        const productosActualizados = productos.filter(p => p.id !== id);
+        setProductos(productosActualizados);
+      } catch (error) {
+        console.error("Error eliminando producto:", error);
+        alert("Error al eliminar el producto. Por favor intenta de nuevo.");
+      }
     }
   };
 
-  const toggleActivo = (id: string) => {
-    const productosActualizados = productos.map(p =>
-      p.id === id ? { ...p, activo: !p.activo } : p
-    );
-    guardarProductos(productosActualizados);
+  const toggleActivo = async (id: string) => {
+    try {
+      const producto = productos.find(p => p.id === id);
+      if (!producto) return;
+      
+      const productoActualizado = { ...producto, activo: !producto.activo };
+      const productoResultado = await actualizarProductoAsync(productoActualizado);
+      
+      const productosActualizados = productos.map(p =>
+        p.id === id ? productoResultado : p
+      );
+      setProductos(productosActualizados);
+    } catch (error) {
+      console.error("Error actualizando estado del producto:", error);
+      alert("Error al actualizar el estado del producto. Por favor intenta de nuevo.");
+    }
   };
 
   const productosActivos = productos.filter(p => p.activo).length;
