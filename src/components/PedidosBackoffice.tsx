@@ -133,6 +133,7 @@ export function PedidosBackoffice() {
               <SelectItem value="NUEVO">Nuevo</SelectItem>
               <SelectItem value="PREPARANDO">Preparando</SelectItem>
               <SelectItem value="LISTO">Listo</SelectItem>
+              <SelectItem value="EN_CAMINO">En camino</SelectItem>
               <SelectItem value="ENTREGADO">Entregado</SelectItem>
             </SelectContent>
           </Select>
@@ -322,6 +323,7 @@ export function PedidosBackoffice() {
                     <SelectItem value="NUEVO">Nuevo</SelectItem>
                     <SelectItem value="PREPARANDO">Preparando</SelectItem>
                     <SelectItem value="LISTO">Listo</SelectItem>
+                    <SelectItem value="EN_CAMINO">En camino</SelectItem>
                     <SelectItem value="ENTREGADO">Entregado</SelectItem>
                   </SelectContent>
                 </Select>

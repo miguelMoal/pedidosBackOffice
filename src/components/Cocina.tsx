@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChefHat, Clock, Eye, CheckCircle2, PlayCircle, Package, Bell } from "lucide-react";
+import { ChefHat, Clock, Eye, CheckCircle2, PlayCircle, Package, Bell, Car } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
@@ -7,7 +7,7 @@ import { getTodosPedidos, getTodosPedidosAsync, actualizarEstadoPedido, getEstad
 import { obtenerTelefonoUsuario } from "../utils/url";
 import { toast } from "sonner@2.0.3";
 
-type Filtro = "todos" | "NUEVO" | "PREPARANDO" | "LISTO" | "ENTREGADO";
+type Filtro = "todos" | "NUEVO" | "PREPARANDO" | "LISTO" | "EN_CAMINO" | "ENTREGADO";
 
 export function Cocina() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -85,6 +85,7 @@ export function Cocina() {
         NUEVO: "🆕 Nuevo pedido",
         PREPARANDO: "🍳 Pedido en preparación",
         LISTO: "✅ Pedido listo para entregar",
+        EN_CAMINO: "🚚 Pedido en camino",
         ENTREGADO: "📦 Pedido entregado"
       };
       
@@ -95,10 +96,7 @@ export function Cocina() {
       
       // Actualizar pedido seleccionado si está abierto
       if (pedidoSeleccionado && pedidoSeleccionado.id === id) {
-        const pedidoActualizado = pedidos.find(p => p.id === id);
-        if (pedidoActualizado) {
-          setPedidoSeleccionado({ ...pedidoActualizado, estado: nuevoEstado });
-        }
+        setPedidoSeleccionado({ ...pedidoSeleccionado, estado: nuevoEstado });
       }
     }, 500);
   };
@@ -107,7 +105,8 @@ export function Cocina() {
     const transiciones: Record<EstadoPedido, { estado: EstadoPedido; texto: string; icono: any; color: string } | null> = {
       NUEVO: { estado: "PREPARANDO", texto: "Iniciar preparación", icono: PlayCircle, color: "bg-amber-500 hover:bg-amber-600" },
       PREPARANDO: { estado: "LISTO", texto: "Marcar como listo", icono: CheckCircle2, color: "bg-cyan-500 hover:bg-cyan-600" },
-      LISTO: { estado: "ENTREGADO", texto: "Marcar entregado", icono: Package, color: "bg-purple-500 hover:bg-purple-600" },
+      LISTO: { estado: "EN_CAMINO", texto: "Enviar pedido", icono: Package, color: "bg-purple-500 hover:bg-purple-600" },
+      EN_CAMINO: { estado: "ENTREGADO", texto: "Marcar entregado", icono: CheckCircle2, color: "!bg-green-600 hover:!bg-green-700" },
       ENTREGADO: null
     };
     return transiciones[estadoActual];
@@ -118,6 +117,7 @@ export function Cocina() {
       NUEVO: Bell,
       PREPARANDO: ChefHat,
       LISTO: CheckCircle2,
+      EN_CAMINO: Car,
       ENTREGADO: Package
     };
     return iconos[estado];
@@ -143,11 +143,17 @@ export function Cocina() {
         badgeActivo: 'bg-white/20 text-white',
         animacion: 'animate-badge-pulse-cyan'
       },
-      ENTREGADO: {
+      EN_CAMINO: {
         icono: 'text-purple-500',
         badge: 'bg-purple-500 text-white',
         badgeActivo: 'bg-white/20 text-white',
         animacion: 'animate-badge-pulse-purple'
+      },
+      ENTREGADO: {
+        icono: 'text-green-500',
+        badge: 'bg-green-500 text-white',
+        badgeActivo: 'bg-white/20 text-white',
+        animacion: 'animate-badge-pulse-green'
       }
     };
     return colores[estado];
@@ -162,6 +168,7 @@ export function Cocina() {
     { id: "NUEVO", label: "Nuevos", count: contarPorEstado("NUEVO") },
     { id: "PREPARANDO", label: "Preparando", count: contarPorEstado("PREPARANDO") },
     { id: "LISTO", label: "Listos", count: contarPorEstado("LISTO") },
+    { id: "EN_CAMINO", label: "En camino", count: contarPorEstado("EN_CAMINO") },
     { id: "ENTREGADO", label: "Entregados", count: contarPorEstado("ENTREGADO") }
   ];
 
@@ -284,7 +291,7 @@ export function Cocina() {
 
                         {siguienteEstado && (
                           <Button
-                            className={`${siguienteEstado.color} text-white h-10 sm:h-12 px-3 sm:px-6 transition-all flex-1 sm:flex-none text-sm ${
+                            className={`h-10 sm:h-12 px-3 sm:px-6 transition-all flex-1 sm:flex-none text-sm text-white ${siguienteEstado.color} ${
                               estaAnimando ? 'scale-95 opacity-50' : 'hover:scale-105'
                             }`}
                             onClick={() => cambiarEstadoPedido(pedido.id, siguienteEstado.estado)}
@@ -295,6 +302,7 @@ export function Cocina() {
                             <span className="sm:hidden">
                               {siguienteEstado.estado === 'PREPARANDO' && 'Iniciar'}
                               {siguienteEstado.estado === 'LISTO' && 'Listo'}
+                              {siguienteEstado.estado === 'EN_CAMINO' && 'Enviar'}
                               {siguienteEstado.estado === 'ENTREGADO' && 'Entregar'}
                             </span>
                           </Button>

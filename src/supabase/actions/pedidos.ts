@@ -1,13 +1,14 @@
 import { supabase } from '../initSupabase';
 
-type EstadoPedido = "NUEVO" | "PREPARANDO" | "LISTO" | "ENTREGADO";
-type EstadoSupabase = "INIT" | "IN_PROGRESS" | "READY" | "DELIVERED" | "PAYED";
+type EstadoPedido = "NUEVO" | "PREPARANDO" | "LISTO" | "EN_CAMINO" | "ENTREGADO";
+type EstadoSupabase = "INIT" | "IN_PROGRESS" | "READY" | "ON_THE_WAY" | "DELIVERED" | "PAYED";
 
 // Mapeo entre estados locales y de Supabase
 const MAPEO_ESTADOS: Record<EstadoSupabase, EstadoPedido> = {
   'INIT': 'NUEVO',
   'IN_PROGRESS': 'PREPARANDO', 
   'READY': 'LISTO',
+  'ON_THE_WAY': 'EN_CAMINO',
   'DELIVERED': 'ENTREGADO',
   'PAYED': 'NUEVO'  // PAYED significa que ya pagó pero apenas va a empezar
 };
@@ -16,6 +17,7 @@ const MAPEO_ESTADOS_INVERSO: Record<EstadoPedido, EstadoSupabase> = {
   'NUEVO': 'PAYED',      // NUEVO se mapea a PAYED (ya pagado, listo para preparar)
   'PREPARANDO': 'IN_PROGRESS',
   'LISTO': 'READY', 
+  'EN_CAMINO': 'ON_THE_WAY',
   'ENTREGADO': 'DELIVERED'
 };
 

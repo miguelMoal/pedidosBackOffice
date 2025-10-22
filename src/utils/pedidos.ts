@@ -10,6 +10,7 @@ export type EstadoPedido =
   | "NUEVO" 
   | "PREPARANDO" 
   | "LISTO" 
+  | "EN_CAMINO"
   | "ENTREGADO";
 
 export interface ItemPedido {
@@ -319,6 +320,7 @@ export function getEstadoInfo(estado: EstadoPedido): { color: string; texto: str
     NUEVO: { color: "bg-blue-500 text-white", texto: "Nuevo pedido" },
     PREPARANDO: { color: "bg-amber-500 text-white", texto: "Preparando" },
     LISTO: { color: "bg-emerald-500 text-white", texto: "Listo" },
+    EN_CAMINO: { color: "bg-purple-500 text-white", texto: "En camino" },
     ENTREGADO: { color: "bg-green-700 text-white", texto: "Entregado" }
   };
   return estados[estado];
