@@ -311,15 +311,7 @@ export function Cocina() {
                       <span>•</span>
                       <span>{pedido.tipo}</span>
                       <span>•</span>
-                      <div className="flex flex-col items-end">
-                        <span className="text-[#FF6B00] font-semibold">${pedido.total} MXN</span>
-                        {pedido.cupon && (
-                          <span className="text-xs text-green-600">-${pedido.cupon.descuento} cupón</span>
-                        )}
-                        {pedido.precioEnvio && (
-                          <span className="text-xs text-gray-500">+${pedido.precioEnvio} envío</span>
-                        )}
-                      </div>
+                      <span className="text-[#FF6B00]">${pedido.total} MXN</span>
                     </div>
 
                     {/* Vista rápida de items */}
