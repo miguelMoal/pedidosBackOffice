@@ -157,7 +157,8 @@ export function Inventarios() {
   };
 
   const productosActivos = productos.filter(p => p.activo && p.stock > 0).length;
-  const valorInventario = productos.reduce((sum, p) => sum + (p.activo ? p.costo : 0), 0);
+  const valorInventario = productos.reduce((sum, p) => sum + (p.activo ? p.costo * p.stock : 0), 0);
+  const totalProductos = productos.length;
 
   return (
     <div className="space-y-6">
@@ -168,10 +169,10 @@ export function Inventarios() {
             <div className="w-12 h-12 bg-[#012B67] rounded-xl flex items-center justify-center">
               <Package className="w-6 h-6 text-white" />
             </div>
-            <div>
-              <p className="text-sm text-[#64748B]">Total productos</p>
-              <p className="text-2xl text-[#1E293B]">{productos.length}</p>
-            </div>
+             <div>
+               <p className="text-sm text-[#64748B]">Total productos</p>
+               <p className="text-2xl text-[#1E293B]">{totalProductos}</p>
+             </div>
           </div>
         </div>
 
@@ -180,10 +181,10 @@ export function Inventarios() {
             <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
               <Package className="w-6 h-6 text-white" />
             </div>
-            <div>
-              <p className="text-sm text-[#64748B]">Productos activos</p>
-              <p className="text-2xl text-[#1E293B]">{productosActivos}</p>
-            </div>
+             <div>
+               <p className="text-sm text-[#64748B]">Productos disponibles</p>
+               <p className="text-2xl text-[#1E293B]">{productosActivos}</p>
+             </div>
           </div>
         </div>
 
@@ -192,10 +193,10 @@ export function Inventarios() {
             <div className="w-12 h-12 bg-[#FE7F1E] rounded-xl flex items-center justify-center">
               <Package className="w-6 h-6 text-white" />
             </div>
-            <div>
-              <p className="text-sm text-[#64748B]">Valor inventario</p>
-              <p className="text-2xl text-[#1E293B]">${valorInventario}</p>
-            </div>
+             <div>
+               <p className="text-sm text-[#64748B]">Valor inventario</p>
+               <p className="text-2xl text-[#1E293B]">${valorInventario.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+             </div>
           </div>
         </div>
       </div>
