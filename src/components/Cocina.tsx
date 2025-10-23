@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChefHat, Clock, Eye, CheckCircle2, PlayCircle, Package, Bell, Car } from "lucide-react";
+import { ChefHat, Clock, Eye, CheckCircle2, PlayCircle, Package, Bell, Car, MessageCircle, MapPin } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
@@ -198,6 +198,23 @@ export function Cocina() {
     setPedidoParaEntregar(null);
   };
 
+  const abrirWhatsApp = (pedido: Pedido) => {
+    const mensaje = `Hola ${pedido.usuario.nombre}, soy de la cocina. Te contacto sobre tu pedido #${pedido.id}.`;
+    const telefono = pedido.usuario.telefono || '1234567890'; // Usar teléfono del usuario o un default
+    const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+  };
+
+  const abrirMapa = (pedido: Pedido) => {
+    if (pedido.direccion) {
+      const direccionCodificada = encodeURIComponent(pedido.direccion);
+      const url = `https://www.google.com/maps/search/?api=1&query=${direccionCodificada}`;
+      window.open(url, '_blank');
+    } else {
+      toast.error("No hay dirección disponible para este pedido");
+    }
+  };
+
   const obtenerSiguienteEstado = (estadoActual: EstadoPedido): { estado: EstadoPedido; texto: string; icono: any; color: string } | null => {
     const transiciones: Record<EstadoPedido, { estado: EstadoPedido; texto: string; icono: any; color: string } | null> = {
       NUEVO: { estado: "PREPARANDO", texto: "Iniciar preparación", icono: PlayCircle, color: "bg-amber-500 hover:bg-amber-600" },
@@ -354,7 +371,7 @@ export function Cocina() {
                   
                   <div className="p-4 md:p-6">
                     {/* Header con usuario y número de pedido */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4 pb-4 border-b border-gray-100">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4 pb-2 border-b border-gray-100">
                       {/* Foto del usuario */}
                       <img 
                         src={pedido.usuario.foto} 
@@ -405,6 +422,29 @@ export function Cocina() {
                           </Button>
                         )}
                       </div>
+                    </div>
+
+                    {/* Botones de WhatsApp y Mapa */}
+                    <div className="flex gap-2" style={{ marginBottom: '15px' }}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300"
+                        onClick={() => abrirWhatsApp(pedido)}
+                      >
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                        WhatsApp
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300"
+                        onClick={() => abrirMapa(pedido)}
+                        disabled={!pedido.direccion}
+                      >
+                        <MapPin className="w-4 h-4 mr-2" />
+                        Ver Mapa
+                      </Button>
                     </div>
 
                     {/* Detalles del pedido */}
