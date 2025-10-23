@@ -38,6 +38,7 @@ export interface Pedido {
   usuario: {
     nombre: string;
     foto: string;
+    telefono?: string;
   };
   cupon?: {
     codigo: string;

@@ -199,8 +199,7 @@ export function Cocina() {
   };
 
   const abrirWhatsApp = (pedido: Pedido) => {
-    const telefono = pedido.usuario.telefono || '11'; // Usar teléfono del usuario o el número por defecto
-    console.log("telefono", telefono);
+    const telefono = pedido.usuario.telefono || ''; // Usar teléfono del usuario o el número por defecto
     const url = `https://wa.me/${telefono}`;
     window.open(url, '_blank');
   };
