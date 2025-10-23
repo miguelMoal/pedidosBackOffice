@@ -199,9 +199,9 @@ export function Cocina() {
   };
 
   const abrirWhatsApp = (pedido: Pedido) => {
-    const mensaje = `Hola ${pedido.usuario.nombre}, soy de la cocina. Te contacto sobre tu pedido #${pedido.id}.`;
-    const telefono = pedido.usuario.telefono || '1234567890'; // Usar teléfono del usuario o un default
-    const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+    const telefono = pedido.usuario.telefono || '11'; // Usar teléfono del usuario o el número por defecto
+    console.log("telefono", telefono);
+    const url = `https://wa.me/${telefono}`;
     window.open(url, '_blank');
   };
 
