@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChefHat, Clock, Eye, CheckCircle2, PlayCircle, Package, Bell, Car, MessageCircle, MapPin } from "lucide-react";
+import { ChefHat, Clock, Eye, CheckCircle2, PlayCircle, Package, Bell, Car, MessageCircle, MapPin, Store, Navigation } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
@@ -8,6 +8,7 @@ import { getTodosPedidos, getTodosPedidosAsync, actualizarEstadoPedido, getEstad
 import { obtenerTelefonoUsuario } from "../utils/url";
 import { supabase } from "../supabase/initSupabase";
 import { toast } from "sonner@2.0.3";
+import DeliveryMap from "./DeliveryMap";
 
 type Filtro = "todos" | "NUEVO" | "PREPARANDO" | "LISTO" | "EN_CAMINO" | "ENTREGADO";
 
@@ -21,6 +22,8 @@ export function Cocina() {
   const [mostrarVerificacion, setMostrarVerificacion] = useState(false);
   const [codigoVerificacion, setCodigoVerificacion] = useState("");
   const [pedidoParaEntregar, setPedidoParaEntregar] = useState<Pedido | null>(null);
+  const [mostrarMapa, setMostrarMapa] = useState(false);
+  const [pedidoParaMapa, setPedidoParaMapa] = useState<Pedido | null>(null);
 
   const cargarPedidos = async () => {
     try {
@@ -205,13 +208,8 @@ export function Cocina() {
   };
 
   const abrirMapa = (pedido: Pedido) => {
-    if (pedido.direccion) {
-      const direccionCodificada = encodeURIComponent(pedido.direccion);
-      const url = `https://www.google.com/maps/search/?api=1&query=${direccionCodificada}`;
-      window.open(url, '_blank');
-    } else {
-      toast.error("No hay dirección disponible para este pedido");
-    }
+    setPedidoParaMapa(pedido);
+    setMostrarMapa(true);
   };
 
   const obtenerSiguienteEstado = (estadoActual: EstadoPedido): { estado: EstadoPedido; texto: string; icono: any; color: string } | null => {
@@ -718,6 +716,59 @@ export function Cocina() {
               </button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal del mapa */}
+      <Dialog open={mostrarMapa} onOpenChange={setMostrarMapa}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Mapa de entrega - Pedido #{pedidoParaMapa?.id}</DialogTitle>
+            <DialogDescription>
+              Seguimiento en tiempo real del pedido
+            </DialogDescription>
+          </DialogHeader>
+
+          {pedidoParaMapa && (
+            <div className="space-y-4">
+
+              {/* Mapa */}
+              <div className="relative h-96 bg-gray-100 rounded-xl border-2 border-gray-300 overflow-hidden">
+                <DeliveryMap
+                  orderStatus={pedidoParaMapa.estado === "EN_CAMINO" ? "ON_THE_WAY" : 
+                              pedidoParaMapa.estado === "ENTREGADO" ? "DELIVERED" : "IN_PROGRESS"}
+                  showDriver={true}
+                  showRoute={true}
+                  restaurantPosition={{ x: 20, y: 70 }}
+                  destinationPosition={{ x: 80, y: 20 }}
+                  driverPosition={{ x: 20, y: 70 }}
+                  eta={18}
+                />
+              </div>
+
+              {/* Estado del pedido */}
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <h3 className="text-[#1E293B] font-medium">Estado actual</h3>
+                </div>
+                <p className="text-sm text-[#64748B] mt-1">
+                  {getEstadoInfo(pedidoParaMapa.estado).texto}
+                </p>
+              </div>
+
+              {/* Botón de cerrar */}
+              <div className="flex justify-end pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setMostrarMapa(false)}
+                  className="px-6"
+                >
+                  Cerrar
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

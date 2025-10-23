@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
 import { CheckCircle2, Navigation, Store } from 'lucide-react';
+
+type OrderStatus = 'IN_PROGRESS' | 'ON_THE_WAY' | 'DELIVERED';
 
 interface DeliveryMapProps {
   orderStatus: OrderStatus;
@@ -88,13 +89,13 @@ function DeliveryMap({
   }, [eta]);
 
   return (
-    <div className={`absolute inset-0 ${className}`}>
+    <div className={`w-full h-full relative ${className}`} style={{ width: '100%', height: '300px' }}>
       {/* Map Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-red-500">
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200">
         {/* Grid */}
         <div className="absolute inset-0 opacity-20">
           <div className="grid grid-cols-6 grid-rows-6 h-full">
-            {Array.from({ length: 36 }).map((_, i) => (
+            {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="border border-gray-400" />
             ))}
           </div>
@@ -111,18 +112,12 @@ function DeliveryMap({
         </div>
 
         {/* Restaurant/Store Location */}
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
+        <div
           className="absolute"
           style={{ left: `${restaurantPosition.x}%`, top: `${restaurantPosition.y}%` }}
         >
           <div className="relative">
-            <motion.div
-              animate={{ 
-                scale: orderStatus === 'IN_PROGRESS' ? [1, 1.1, 1] : 1 
-              }}
-              transition={{ repeat: orderStatus === 'IN_PROGRESS' ? Infinity : 0, duration: 2 }}
+            <div
               className={`w-14 h-14 rounded-full flex items-center justify-center shadow-xl ${
                 orderStatus === 'IN_PROGRESS' 
                   ? 'bg-[#FFD54F]' 
@@ -130,34 +125,20 @@ function DeliveryMap({
               }`}
             >
               <Store className="w-7 h-7 text-white" />
-            </motion.div>
-            {orderStatus === 'IN_PROGRESS' && (
-              <motion.div
-                animate={{ scale: [1, 1.5, 1], opacity: [0.8, 0, 0.8] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-                className="absolute inset-0 w-14 h-14 rounded-full bg-[#FFD54F]/30"
-              />
-            )}
+            </div>
             <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white px-2 py-1 rounded shadow-sm text-xs">
               {orderStatus === 'IN_PROGRESS' ? '🍳 Preparando...' : '🏪 Restaurante'}
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Your Location (Destination) */}
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
+        <div
           className="absolute"
           style={{ left: `${destinationPosition.x}%`, top: `${destinationPosition.y}%` }}
         >
           <div className="relative">
-            <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ 
-                repeat: orderStatus === 'DELIVERED' ? 0 : Infinity, 
-                duration: 2 
-              }}
+            <div
               className={`w-12 h-12 rounded-full flex items-center justify-center ${
                 orderStatus === 'DELIVERED' 
                   ? 'bg-green-500/20' 
@@ -175,38 +156,34 @@ function DeliveryMap({
                   <Navigation className="w-4 h-4 text-white" />
                 )}
               </div>
-            </motion.div>
+            </div>
             <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white px-2 py-1 rounded shadow-sm text-xs">
               {orderStatus === 'DELIVERED' ? '✓ Entregado' : 'Tu ubicación'}
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Driver Position - Only show when ON_THE_WAY or DELIVERED */}
         {showDriver && (orderStatus === 'ON_THE_WAY' || orderStatus === 'DELIVERED') && (
           <>
-            <motion.div
-              animate={{
+            <div
+              className="absolute"
+              style={{
                 left: orderStatus === 'DELIVERED' ? `${destinationPosition.x}%` : `${currentDriverPosition.x}%`,
                 top: orderStatus === 'DELIVERED' ? `${destinationPosition.y}%` : `${currentDriverPosition.y}%`
               }}
-              transition={{ type: 'spring', damping: 20 }}
-              className="absolute"
             >
-              <motion.div
-                animate={{ rotate: -45 }}
-                className="relative"
-              >
+              <div className="relative">
                 <div className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center border-2 border-[#046741]" style={{ transform: 'rotate(45deg)' }}>
                   <span className="text-xl">🧑</span>
                 </div>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
 
             {/* Route Line */}
             {showRoute && orderStatus === 'ON_THE_WAY' && (
               <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                <motion.path
+                <path
                   d={`M ${currentDriverPosition.x}% ${currentDriverPosition.y}% Q ${(currentDriverPosition.x + destinationPosition.x) / 2}% ${(currentDriverPosition.y + destinationPosition.y) / 2 - 10}% ${destinationPosition.x}% ${destinationPosition.y}%`}
                   stroke="#046741"
                   strokeWidth="3"
