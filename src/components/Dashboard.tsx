@@ -41,12 +41,15 @@ export function Dashboard() {
 
     // Agrupar por zona (usando tipo de entrega como zona)
     const ventasPorZona = pedidosData.reduce((acc, pedido) => {
-      const zona = pedido.tipoEntrega || 'Delivery';
-      if (!acc[zona]) {
-        acc[zona] = { zona, ventas: 0, total: 0 };
+      // Solo procesar pedidos que tengan tipoEntrega definido
+      if (pedido.tipoEntrega) {
+        const zona = pedido.tipoEntrega;
+        if (!acc[zona]) {
+          acc[zona] = { zona, ventas: 0, total: 0 };
+        }
+        acc[zona].ventas += 1;
+        acc[zona].total += pedido.total;
       }
-      acc[zona].ventas += 1;
-      acc[zona].total += pedido.total;
       return acc;
     }, {} as Record<string, { zona: string; ventas: number; total: number }>);
 
