@@ -95,7 +95,7 @@ export default function App() {
   };
 
   const navegacion = [
-    { id: "cocina" as Vista, nombre: "Panel de Pedidos", icon: Sandwich },
+    { id: "cocina" as Vista, nombre: "Atención de Pedidos", icon: Sandwich },
     { id: "inventarios" as Vista, nombre: "Inventarios", icon: Package },
     { id: "pedidos" as Vista, nombre: "Pedidos", icon: ShoppingBag },
     { id: "dashboard" as Vista, nombre: "Dashboard", icon: BarChart3 },
