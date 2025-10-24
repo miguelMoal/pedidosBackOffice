@@ -28,7 +28,7 @@ export interface Pedido {
   subtotal: number;
   total: number;
   hora: string;
-  tipo: "caseta" | "gubernamental" | "Delivery";
+  tipo: "caseta" | "gubernamental" | "Delivery" | "-";
   tipoEntrega?: "caseta" | "gubernamental";
   direccion?: string;
   vehiculo?: string;
