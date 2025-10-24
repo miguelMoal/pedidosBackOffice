@@ -1,4 +1,4 @@
-import image_cbf401e0e450f82b3043656c47686eaa83198a31 from 'figma:asset/cbf401e0e450f82b3043656c47686eaa83198a31.png';
+import imagePF from './assets/PF.png';
 import { useEffect, useState } from "react";
 import { Sandwich, Package, ShoppingBag, BarChart3, MapPin, Clock, Store, Car, Home } from "lucide-react";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
@@ -137,7 +137,7 @@ console.log("ordenesPendientes", ordenesPendientes)
             <div className="flex items-center gap-3 lg:gap-4">
               <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-xl overflow-hidden bg-white shadow-sm flex-shrink-0">
                 <ImageWithFallback 
-                  src={image_cbf401e0e450f82b3043656c47686eaa83198a31}
+                  src={imagePF}
                   alt="Jaguares de Nayarit Logo"
                   className="w-full h-full object-cover"
                 />
