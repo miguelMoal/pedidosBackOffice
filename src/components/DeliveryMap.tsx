@@ -89,44 +89,137 @@ function DeliveryMap({
   }, [eta]);
 
   return (
-    <div className={`w-full h-full relative ${className}`} style={{ width: '100%', height: '300px' }}>
+    <div 
+      style={{ 
+        width: '100%', 
+        height: '300px',
+        position: 'relative',
+        ...(className ? { className } : {})
+      }}
+    >
       {/* Map Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200">
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'linear-gradient(to bottom right, #f3f4f6, #e5e7eb)'
+      }}>
         {/* Grid */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="grid grid-cols-6 grid-rows-6 h-full">
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          opacity: 0.2
+        }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(6, 1fr)',
+            gridTemplateRows: 'repeat(6, 1fr)',
+            height: '100%'
+          }}>
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="border border-gray-400" />
+              <div key={i} style={{ border: '1px solid #9ca3af' }} />
             ))}
           </div>
         </div>
 
         {/* Streets */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-0 right-0 h-2 bg-gray-300" />
-          <div className="absolute top-2/4 left-0 right-0 h-2 bg-gray-300" />
-          <div className="absolute top-3/4 left-0 right-0 h-2 bg-gray-300" />
-          <div className="absolute left-1/4 top-0 bottom-0 w-2 bg-gray-300" />
-          <div className="absolute left-2/4 top-0 bottom-0 w-2 bg-gray-300" />
-          <div className="absolute left-3/4 top-0 bottom-0 w-2 bg-gray-300" />
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0
+        }}>
+          <div style={{
+            position: 'absolute',
+            top: '25%',
+            left: 0,
+            right: 0,
+            height: '8px',
+            backgroundColor: '#d1d5db'
+          }} />
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: 0,
+            right: 0,
+            height: '8px',
+            backgroundColor: '#d1d5db'
+          }} />
+          <div style={{
+            position: 'absolute',
+            top: '75%',
+            left: 0,
+            right: 0,
+            height: '8px',
+            backgroundColor: '#d1d5db'
+          }} />
+          <div style={{
+            position: 'absolute',
+            left: '25%',
+            top: 0,
+            bottom: 0,
+            width: '8px',
+            backgroundColor: '#d1d5db'
+          }} />
+          <div style={{
+            position: 'absolute',
+            left: '50%',
+            top: 0,
+            bottom: 0,
+            width: '8px',
+            backgroundColor: '#d1d5db'
+          }} />
+          <div style={{
+            position: 'absolute',
+            left: '75%',
+            top: 0,
+            bottom: 0,
+            width: '8px',
+            backgroundColor: '#d1d5db'
+          }} />
         </div>
 
         {/* Restaurant/Store Location */}
         <div
-          className="absolute"
-          style={{ left: `${restaurantPosition.x}%`, top: `${restaurantPosition.y}%` }}
+          style={{
+            position: 'absolute',
+            left: `${restaurantPosition.x}%`,
+            top: `${restaurantPosition.y}%`
+          }}
         >
-          <div className="relative">
+          <div style={{ position: 'relative' }}>
             <div
-              className={`w-14 h-14 rounded-full flex items-center justify-center shadow-xl ${
-                orderStatus === 'IN_PROGRESS' 
-                  ? 'bg-[#FFD54F]' 
-                  : 'bg-[#046741]'
-              }`}
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                backgroundColor: orderStatus === 'IN_PROGRESS' ? '#FFD54F' : '#046741'
+              }}
             >
-              <Store className="w-7 h-7 text-white" />
+              <Store style={{ width: '28px', height: '28px', color: 'white' }} />
             </div>
-            <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white px-2 py-1 rounded shadow-sm text-xs">
+            <div style={{
+              position: 'absolute',
+              bottom: '-28px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              whiteSpace: 'nowrap',
+              backgroundColor: 'white',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+              fontSize: '12px'
+            }}>
               {orderStatus === 'IN_PROGRESS' ? '🍳 Preparando...' : '🏪 Restaurante'}
             </div>
           </div>
@@ -134,30 +227,52 @@ function DeliveryMap({
 
         {/* Your Location (Destination) */}
         <div
-          className="absolute"
-          style={{ left: `${destinationPosition.x}%`, top: `${destinationPosition.y}%` }}
+          style={{
+            position: 'absolute',
+            left: `${destinationPosition.x}%`,
+            top: `${destinationPosition.y}%`
+          }}
         >
-          <div className="relative">
+          <div style={{ position: 'relative' }}>
             <div
-              className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                orderStatus === 'DELIVERED' 
-                  ? 'bg-green-500/20' 
-                  : 'bg-[#046741]/20'
-              }`}
+              style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: orderStatus === 'DELIVERED' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(4, 103, 65, 0.2)'
+              }}
             >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                orderStatus === 'DELIVERED' 
-                  ? 'bg-green-500' 
-                  : 'bg-[#046741]'
-              }`}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: orderStatus === 'DELIVERED' ? '#22c55e' : '#046741'
+              }}>
                 {orderStatus === 'DELIVERED' ? (
-                  <CheckCircle2 className="w-4 h-4 text-white" />
+                  <CheckCircle2 style={{ width: '16px', height: '16px', color: 'white' }} />
                 ) : (
-                  <Navigation className="w-4 h-4 text-white" />
+                  <Navigation style={{ width: '16px', height: '16px', color: 'white' }} />
                 )}
               </div>
             </div>
-            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white px-2 py-1 rounded shadow-sm text-xs">
+            <div style={{
+              position: 'absolute',
+              bottom: '-32px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              whiteSpace: 'nowrap',
+              backgroundColor: 'white',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+              fontSize: '12px'
+            }}>
               {orderStatus === 'DELIVERED' ? '✓ Entregado' : 'Tu ubicación'}
             </div>
           </div>
@@ -167,22 +282,42 @@ function DeliveryMap({
         {showDriver && (orderStatus === 'ON_THE_WAY' || orderStatus === 'DELIVERED') && (
           <>
             <div
-              className="absolute"
               style={{
+                position: 'absolute',
                 left: orderStatus === 'DELIVERED' ? `${destinationPosition.x}%` : `${currentDriverPosition.x}%`,
                 top: orderStatus === 'DELIVERED' ? `${destinationPosition.y}%` : `${currentDriverPosition.y}%`
               }}
             >
-              <div className="relative">
-                <div className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center border-2 border-[#046741]" style={{ transform: 'rotate(45deg)' }}>
-                  <span className="text-xl">🧑</span>
+              <div style={{ position: 'relative' }}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  backgroundColor: 'white',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid #046741',
+                  transform: 'rotate(45deg)'
+                }}>
+                  <span style={{ fontSize: '20px' }}>🧑</span>
                 </div>
               </div>
             </div>
 
             {/* Route Line */}
             {showRoute && orderStatus === 'ON_THE_WAY' && (
-              <svg className="absolute inset-0 w-full h-full pointer-events-none">
+              <svg style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none'
+              }}>
                 <path
                   d={`M ${currentDriverPosition.x}% ${currentDriverPosition.y}% Q ${(currentDriverPosition.x + destinationPosition.x) / 2}% ${(currentDriverPosition.y + destinationPosition.y) / 2 - 10}% ${destinationPosition.x}% ${destinationPosition.y}%`}
                   stroke="#046741"
