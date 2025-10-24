@@ -157,7 +157,8 @@ export function Inventarios() {
   };
 
   const productosActivos = productos.filter(p => p.activo && p.stock > 0).length;
-  const valorInventario = productos.reduce((sum, p) => sum + (p.activo ? p.costo * p.stock : 0), 0);
+  const costoInventario = productos.reduce((sum, p) => sum + (p.activo ? p.costo * p.stock : 0), 0);
+  const valorInventario = productos.reduce((sum, p) => sum + (p.activo ? p.precio * p.stock : 0), 0);
 
   const obtenerEstiloStock = (stock: number) => {
     if (stock === 0) return { backgroundColor: '#ef4444', color: 'white' }; // Rojo
@@ -171,8 +172,9 @@ export function Inventarios() {
     <div className="space-y-6">
       {/* Header con stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+       
+
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
               <Package className="w-6 h-6 text-white" />
@@ -183,20 +185,19 @@ export function Inventarios() {
              </div>
           </div>
         </div>
-      
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        
+
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-[#FE7F1E] rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
               <Package className="w-6 h-6 text-white" />
             </div>
              <div>
                <p className="text-sm text-[#64748B]">Costo inventario</p>
-               <p className="text-2xl text-[#1E293B]">${valorInventario.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+               <p className="text-2xl text-[#1E293B]">${costoInventario.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
              </div>
           </div>
         </div>
-
-        
 
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3">
