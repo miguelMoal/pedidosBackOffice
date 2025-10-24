@@ -44,15 +44,17 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    // Contar órdenes con status PAYED desde Supabase
+    // Contar pedidos con estado NUEVO desde Supabase
     const calcularPendientes = async () => {
       try {
         const businessId = obtenerBusinessId();
-        const pendientes = await obtenerOrdenesPayed(businessId);
+        const { obtenerPedidos } = await import('./supabase/actions/pedidos');
+        const todosPedidos = await obtenerPedidos(businessId);
+        const pendientes = todosPedidos.filter(p => p.estado === 'NUEVO').length;
         console.log("pendientes", pendientes)
         setOrdenesPendientes(pendientes);
       } catch (error) {
-        console.error("Error contando órdenes PAYED desde Supabase:", error);
+        console.error("Error contando pedidos NUEVOS desde Supabase:", error);
         // Fallback a localStorage
         try {
           const pedidosData = localStorage.getItem('pedidos');

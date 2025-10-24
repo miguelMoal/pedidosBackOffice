@@ -1,16 +1,17 @@
 import { supabase } from '../initSupabase';
 
 type EstadoPedido = "NUEVO" | "PREPARANDO" | "LISTO" | "EN_CAMINO" | "ENTREGADO";
-type EstadoSupabase = "INIT" | "IN_PROGRESS" | "READY" | "ON_THE_WAY" | "DELIVERED" | "PAYED";
+type EstadoSupabase = "INIT" | "IN_PROGRESS" | "READY" | "ON_THE_WAY" | "DELIVERED" | "PAYED" | "BOT_READY";
 
 // Mapeo entre estados locales y de Supabase
 const MAPEO_ESTADOS: Record<EstadoSupabase, EstadoPedido> = {
-  'INIT': 'NUEVO',
+  'INIT': 'PREPARANDO',  // INIT no es nuevo, ya está en proceso
   'IN_PROGRESS': 'PREPARANDO', 
   'READY': 'LISTO',
   'ON_THE_WAY': 'EN_CAMINO',
   'DELIVERED': 'ENTREGADO',
   'PAYED': 'NUEVO'  // PAYED significa que ya pagó pero apenas va a empezar
+  // BOT_READY no se mapea porque no ha sido pagado
 };
 
 const MAPEO_ESTADOS_INVERSO: Record<EstadoPedido, EstadoSupabase> = {
@@ -102,6 +103,7 @@ export async function obtenerPedidos(businessId: string): Promise<Pedido[]> {
       `)
       .eq('business_id', parseInt(businessId))
       .neq('status', 'INIT')
+      .neq('status', 'BOT_READY')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -346,6 +348,7 @@ export async function obtenerPedidoPorId(id: string, businessId: string): Promis
       .eq('id', parseInt(id))
       .eq('business_id', parseInt(businessId))
       .neq('status', 'INIT')
+      .neq('status', 'BOT_READY')
       .single();
 
     if (error) {
