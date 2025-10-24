@@ -171,19 +171,8 @@ export function Inventarios() {
     <div className="space-y-6">
       {/* Header con stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-[#0C3B2A] rounded-xl flex items-center justify-center">
-              <Package className="w-6 h-6 text-white" />
-            </div>
-             <div>
-               <p className="text-sm text-[#64748B]">Total productos</p>
-               <p className="text-2xl text-[#1E293B]">{totalProductos}</p>
-             </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
               <Package className="w-6 h-6 text-white" />
@@ -194,6 +183,20 @@ export function Inventarios() {
              </div>
           </div>
         </div>
+      
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-[#FE7F1E] rounded-xl flex items-center justify-center">
+              <Package className="w-6 h-6 text-white" />
+            </div>
+             <div>
+               <p className="text-sm text-[#64748B]">Costo inventario</p>
+               <p className="text-2xl text-[#1E293B]">${valorInventario.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+             </div>
+          </div>
+        </div>
+
+        
 
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3">
@@ -201,7 +204,7 @@ export function Inventarios() {
               <Package className="w-6 h-6 text-white" />
             </div>
              <div>
-               <p className="text-sm text-[#64748B]">Costo inventario</p>
+               <p className="text-sm text-[#64748B]">Valor inventario</p>
                <p className="text-2xl text-[#1E293B]">${valorInventario.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
              </div>
           </div>
