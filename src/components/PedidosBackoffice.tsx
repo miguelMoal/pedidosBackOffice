@@ -277,14 +277,6 @@ export function PedidosBackoffice() {
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => eliminarPedido(pedido.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -352,13 +344,6 @@ export function PedidosBackoffice() {
                 >
                   <Eye className="w-4 h-4 mr-2" />
                   Ver detalle
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => eliminarPedido(pedido.id)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
