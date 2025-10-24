@@ -17,7 +17,6 @@ function mapearProductoLocalASupabase(producto: Producto) {
     name: producto.nombre,
     price: producto.precio,
     cost: producto.costo,
-    margin: calcularMargen(producto.precio, producto.costo), // Calcular margen como porcentaje
     stock: producto.stock,
     image_url: producto.imagen,
     business: 'PUESTO' as const, // Por defecto para el backoffice
@@ -173,7 +172,6 @@ export async function guardarProductosAsync(productos: Producto[]) {
             name: producto.name,
             price: producto.price,
             cost: producto.cost,
-            margin: producto.margin,
             stock: producto.stock,
             image_url: producto.image_url
           })
@@ -264,7 +262,6 @@ export async function actualizarProductoAsync(producto: Producto): Promise<Produ
           name: productoMapeado.name,
           price: productoMapeado.price,
           cost: productoMapeado.cost,
-          margin: productoMapeado.margin,
           stock: productoMapeado.stock,
           image_url: productoMapeado.image_url
         })
