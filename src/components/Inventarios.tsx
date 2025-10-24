@@ -201,7 +201,7 @@ export function Inventarios() {
               <Package className="w-6 h-6 text-white" />
             </div>
              <div>
-               <p className="text-sm text-[#64748B]">Valor inventario</p>
+               <p className="text-sm text-[#64748B]">Costo inventario</p>
                <p className="text-2xl text-[#1E293B]">${valorInventario.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
              </div>
           </div>
