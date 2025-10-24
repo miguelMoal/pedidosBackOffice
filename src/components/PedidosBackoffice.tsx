@@ -253,7 +253,7 @@ export function PedidosBackoffice() {
                         <span className="text-[#1E293B]">{pedido.usuario.nombre}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-[#FE7F1E]">${pedido.total}</td>
+                    <td className="px-6 py-4 text-[#FE7F1E]">${pedido.total.toFixed(2)}</td>
                     <td className="px-6 py-4">
                       <Badge className={getEstadoInfo(pedido.estado).color}>
                         {getEstadoInfo(pedido.estado).texto}
@@ -321,7 +321,7 @@ export function PedidosBackoffice() {
               <div className="grid grid-cols-2 gap-3 mb-3">
                 <div>
                   <p className="text-xs text-[#64748B] mb-0.5">Total</p>
-                  <p className="text-[#FE7F1E]">${pedido.total}</p>
+                  <p className="text-[#FE7F1E]">${pedido.total.toFixed(2)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-[#64748B] mb-0.5">Tipo</p>
@@ -444,13 +444,13 @@ export function PedidosBackoffice() {
                         <p className="text-[#1E293B]">{item.nombre}</p>
                         <p className="text-sm text-[#64748B]">x{item.cantidad}</p>
                       </div>
-                      <p className="text-[#FE7F1E]">${item.precio * item.cantidad}</p>
+                      <p className="text-[#FE7F1E]">${(item.precio * item.cantidad).toFixed(2)}</p>
                     </div>
                   ))}
                 </div>
                 <div className="mt-3 pt-3 border-t flex justify-between items-center">
                   <span className="text-[#1E293B]">Total</span>
-                  <span className="text-[#FE7F1E]">${pedidoSeleccionado.total}</span>
+                  <span className="text-[#FE7F1E]">${pedidoSeleccionado.total.toFixed(2)}</span>
                 </div>
               </div>
 

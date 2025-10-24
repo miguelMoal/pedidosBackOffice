@@ -453,7 +453,7 @@ export function Cocina() {
                       <span>•</span>
                       <span>{pedido.tipo}</span>
                       <span>•</span>
-                      <span className="text-[#FF6B00]">${pedido.total} MXN</span>
+                      <span className="text-[#FF6B00]">${pedido.total.toFixed(2)} MXN</span>
                     </div>
 
                     {/* Vista rápida de items */}
@@ -598,23 +598,23 @@ export function Cocina() {
                 <div className="mt-3 pt-3 border-t space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-[#1E293B]">Subtotal</span>
-                    <span className="text-[#1E293B]">${pedidoSeleccionado.subtotal} MXN</span>
+                    <span className="text-[#1E293B]">${pedidoSeleccionado.subtotal.toFixed(2)} MXN</span>
                   </div>
                   {pedidoSeleccionado.cupon && (
                     <div className="flex justify-between items-center">
                       <span className="text-green-600">Descuento ({pedidoSeleccionado.cupon.codigo})</span>
-                      <span className="text-green-600">-${pedidoSeleccionado.cupon.descuento} MXN</span>
+                      <span className="text-green-600">-${pedidoSeleccionado.cupon.descuento.toFixed(2)} MXN</span>
                     </div>
                   )}
                   {pedidoSeleccionado.precioEnvio && (
                     <div className="flex justify-between items-center">
                       <span className="text-[#64748B]">Envío</span>
-                      <span className="text-[#64748B]">+${pedidoSeleccionado.precioEnvio} MXN</span>
+                      <span className="text-[#64748B]">+${pedidoSeleccionado.precioEnvio.toFixed(2)} MXN</span>
                     </div>
                   )}
                   <div className="flex justify-between items-center pt-2 border-t border-gray-200">
                     <span className="text-[#1E293B] font-semibold">Total</span>
-                    <span className="text-[#FF6B00] font-semibold text-lg">${pedidoSeleccionado.total} MXN</span>
+                    <span className="text-[#FF6B00] font-semibold text-lg">${pedidoSeleccionado.total.toFixed(2)} MXN</span>
                   </div>
                 </div>
               </div>

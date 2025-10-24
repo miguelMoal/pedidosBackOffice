@@ -259,8 +259,8 @@ export function Inventarios() {
                         {producto.categoria || "Sin categoría"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-[#64748B]">${producto.costo}</td>
-                    <td className="px-6 py-4 text-[#1E293B]">${producto.precio}</td>
+                    <td className="px-6 py-4 text-[#64748B]">${producto.costo.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-[#1E293B]">${producto.precio.toFixed(2)}</td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-sm text-white ${
                         parseInt(margen) > 50 

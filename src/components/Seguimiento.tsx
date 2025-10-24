@@ -278,7 +278,7 @@ export function Seguimiento() {
                     <p className="text-[#1E293B] group-hover:text-white truncate">{pedido.usuario.nombre}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <p className="text-xs text-[#64748B] group-hover:text-purple-200">{pedido.hora}</p>
-                      <span className="text-xs text-[#FE7F1E] group-hover:text-[#FE7F1E]">${pedido.total}</span>
+                      <span className="text-xs text-[#FE7F1E] group-hover:text-[#FE7F1E]">${pedido.total.toFixed(2)}</span>
                     </div>
                     <p className="text-xs text-[#64748B] group-hover:text-purple-200 mt-1">{pedido.usuario.telefono}</p>
                   </div>
@@ -336,7 +336,7 @@ export function Seguimiento() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-3 bg-gray-50 rounded-xl">
                   <p className="text-sm text-[#64748B]">Total</p>
-                  <p className="text-[#FE7F1E]">${pedidoEncontrado.total}</p>
+                  <p className="text-[#FE7F1E]">${pedidoEncontrado.total.toFixed(2)}</p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded-xl">
                   <p className="text-sm text-[#64748B]">Hora</p>
@@ -425,7 +425,7 @@ export function Seguimiento() {
                     <p className="text-[#1E293B]">{item.nombre}</p>
                     <p className="text-sm text-[#64748B]">Cantidad: {item.cantidad}</p>
                   </div>
-                  <p className="text-[#FE7F1E]">${item.precio * item.cantidad}</p>
+                  <p className="text-[#FE7F1E]">${(item.precio * item.cantidad).toFixed(2)}</p>
                 </div>
               ))}
             </div>
