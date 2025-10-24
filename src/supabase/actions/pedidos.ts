@@ -38,7 +38,7 @@ export interface Pedido {
   subtotal: number;
   total: number;
   hora: string;
-  tipo: "Delivery" | "Recoger";
+  tipo: "caseta" | "gubernamental" | "Delivery";
   tipoEntrega?: "caseta" | "gubernamental";
   direccion?: string;
   vehiculo?: string;
@@ -186,7 +186,7 @@ export async function obtenerPedidos(businessId: string): Promise<Pedido[]> {
           hour: '2-digit', 
           minute: '2-digit' 
         }),
-        tipo: "Delivery" as const, // Por defecto
+        tipo: tipoEntrega || "Delivery" as const,
         tipoEntrega,
         direccion,
         vehiculo,
@@ -428,7 +428,7 @@ export async function obtenerPedidoPorId(id: string, businessId: string): Promis
         hour: '2-digit', 
         minute: '2-digit' 
       }),
-      tipo: "Delivery" as const,
+      tipo: tipoEntrega || "Delivery" as const,
       tipoEntrega,
       direccion,
       vehiculo,
