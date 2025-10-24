@@ -267,13 +267,19 @@ export function Seguimiento() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-sm text-[#0C3B2A] group-hover:text-white group-hover:underline">#{pedido.id}</span>
-                      <span className={`w-2 h-2 rounded-full ${
-                        pedido.estado === 'NUEVO' ? 'bg-emerald-500' :
-                        pedido.estado === 'PREPARANDO' ? 'bg-amber-500' :
-                        pedido.estado === 'LISTO' ? 'bg-cyan-500' :
-                        pedido.estado === 'EN_CAMINO' ? 'bg-purple-500' :
-                        'bg-emerald-500'
-                      }`}></span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        pedido.estado === 'NUEVO' ? 'bg-emerald-100 text-emerald-700' :
+                        pedido.estado === 'PREPARANDO' ? 'bg-amber-100 text-amber-700' :
+                        pedido.estado === 'LISTO' ? 'bg-blue-100 text-blue-700' :
+                        pedido.estado === 'EN_CAMINO' ? 'bg-purple-100 text-purple-700' :
+                        'bg-emerald-100 text-emerald-700'
+                      }`}>
+                        {pedido.estado === 'NUEVO' ? 'Nuevo' :
+                         pedido.estado === 'PREPARANDO' ? 'Preparando' :
+                         pedido.estado === 'LISTO' ? 'Listo' :
+                         pedido.estado === 'EN_CAMINO' ? 'En camino' :
+                         'Entregado'}
+                      </span>
                     </div>
                     <p className="text-[#1E293B] group-hover:text-white truncate">{pedido.usuario.nombre}</p>
                     <div className="flex items-center gap-2 mt-1">

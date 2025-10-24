@@ -147,7 +147,7 @@ console.log("ordenesPendientes", ordenesPendientes)
                 <div className="flex flex-col lg:flex-row lg:items-center gap-1 lg:gap-3 mt-1">
                   <div className="flex items-center gap-1 text-[#1E293B] text-sm">
                     <MapPin className="w-4 h-4 flex-shrink-0" />
-                    <span className="truncate">Unidad Deportiva S/N, Santa Teresita, Tepic</span>
+                    <span className="truncate">Heroica de Nogales, Fundó Legal, Centro, 84000 Heroica Nogales, Son.</span>
                   </div>
                   <div className="flex items-center gap-1 text-[#1E293B] text-sm">
                     <Clock className="w-4 h-4 flex-shrink-0" />
