@@ -3,7 +3,7 @@ import { TrendingUp, TrendingDown, Calendar, MapPin, Package } from "lucide-reac
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { ventasData } from "../data/ventas";
 import { obtenerPedidos } from "../supabase/actions/pedidos";
-import { obtenerTelefonoUsuario } from "../utils/url";
+import { obtenerBusinessId } from "../utils/url";
 
 export function Dashboard() {
   const [ventas, setVentas] = useState(ventasData);
@@ -62,8 +62,8 @@ export function Dashboard() {
       setCargando(true);
       setError(null);
       
-      const userPhone = obtenerTelefonoUsuario();
-      const pedidosData = await obtenerPedidos(userPhone);
+      const businessId = obtenerBusinessId();
+      const pedidosData = await obtenerPedidos(businessId);
       setPedidos(pedidosData);
       
       // Procesar datos de ventas desde pedidos reales

@@ -5,7 +5,7 @@ import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { getTodosPedidos, getTodosPedidosAsync, actualizarEstadoPedido, getEstadoInfo, type Pedido, type EstadoPedido } from "../utils/pedidos";
-import { obtenerTelefonoUsuario } from "../utils/url";
+import { obtenerBusinessId } from "../utils/url";
 import { supabase } from "../supabase/initSupabase";
 import { toast } from "sonner@2.0.3";
 import DeliveryMap from "./DeliveryMap";
@@ -27,8 +27,8 @@ export function Cocina() {
 
   const cargarPedidos = async () => {
     try {
-      const userPhone = obtenerTelefonoUsuario();
-      const todosPedidos = await getTodosPedidosAsync(userPhone);
+      const businessId = obtenerBusinessId();
+      const todosPedidos = await getTodosPedidosAsync(businessId);
       setPedidos(todosPedidos);
     } catch (error) {
       console.error("Error cargando pedidos:", error);
@@ -85,8 +85,8 @@ export function Cocina() {
     // Esperar que termine la animación antes de actualizar
     setTimeout(async () => {
       try {
-        const userPhone = obtenerTelefonoUsuario();
-        await actualizarEstadoPedido(id, nuevoEstado, userPhone);
+        const businessId = obtenerBusinessId();
+        await actualizarEstadoPedido(id, nuevoEstado, businessId);
         await cargarPedidos();
         setPedidoAnimando(null);
       } catch (error) {
@@ -130,12 +130,12 @@ export function Cocina() {
 
     try {
       // Validar el código contra Supabase
-      const userPhone = obtenerTelefonoUsuario();
+      const businessId = obtenerBusinessId();
       const { data: order, error } = await supabase
         .from('orders')
         .select('confirmation_code')
         .eq('id', parseInt(pedidoParaEntregar.id))
-        .eq('user_phone', userPhone)
+        .eq('business_id', parseInt(businessId))
         .single();
 
       if (error) {
@@ -160,8 +160,8 @@ export function Cocina() {
         
         // Actualizar el estado directamente sin pasar por la validación de ENTREGADO
         try {
-          const userPhone = obtenerTelefonoUsuario();
-          await actualizarEstadoPedido(pedidoParaEntregar.id, "ENTREGADO", userPhone);
+          const businessId = obtenerBusinessId();
+          await actualizarEstadoPedido(pedidoParaEntregar.id, "ENTREGADO", businessId);
           await cargarPedidos();
           
           // Actualizar pedido seleccionado si está abierto

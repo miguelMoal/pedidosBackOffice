@@ -6,7 +6,7 @@ import { Badge } from "./ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { getTodosPedidos, actualizarEstadoPedido, type Pedido, type EstadoPedido, getEstadoInfo } from "../utils/pedidos";
 import { obtenerPedidos, actualizarEstadoPedido as actualizarEstadoPedidoSupabase } from "../supabase/actions/pedidos";
-import { obtenerTelefonoUsuario } from "../utils/url";
+import { obtenerBusinessId } from "../utils/url";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 export function PedidosBackoffice() {
@@ -23,8 +23,8 @@ export function PedidosBackoffice() {
       setCargando(true);
       setError(null);
       
-      const userPhone = obtenerTelefonoUsuario();
-      const todosPedidos = await obtenerPedidos(userPhone);
+      const businessId = obtenerBusinessId();
+      const todosPedidos = await obtenerPedidos(businessId);
       setPedidos(todosPedidos);
     } catch (error) {
       console.error("Error cargando pedidos:", error);
@@ -75,8 +75,8 @@ export function PedidosBackoffice() {
       setCargando(true);
       setError(null);
       
-      const userPhone = obtenerTelefonoUsuario();
-      await actualizarEstadoPedidoSupabase(id, nuevoEstado, userPhone);
+      const businessId = obtenerBusinessId();
+      await actualizarEstadoPedidoSupabase(id, nuevoEstado, businessId);
       
       // Actualizar estado local inmediatamente
       setPedidos(prev => prev.map(p => 

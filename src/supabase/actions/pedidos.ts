@@ -56,11 +56,11 @@ export interface Pedido {
   precioEnvio?: number;
 }
 
-// Obtener todos los pedidos de Supabase para un usuario específico
-export async function obtenerPedidos(userPhone: string): Promise<Pedido[]> {
+// Obtener todos los pedidos de Supabase para un negocio específico
+export async function obtenerPedidos(businessId: string): Promise<Pedido[]> {
   try {
     
-    // Obtener órdenes con sus items y productos del usuario actual
+    // Obtener órdenes con sus items y productos del negocio actual
     // Excluir órdenes con status INIT (no pagadas)
     const { data: orders, error } = await supabase
       .from('orders')
@@ -69,6 +69,7 @@ export async function obtenerPedidos(userPhone: string): Promise<Pedido[]> {
         status,
         created_at,
         user_phone,
+        business_id,
         price,
         order_type,
         coupon_applied,
@@ -99,7 +100,7 @@ export async function obtenerPedidos(userPhone: string): Promise<Pedido[]> {
           floor
         )
       `)
-      .eq('user_phone', userPhone)
+      .eq('business_id', parseInt(businessId))
       .neq('status', 'INIT')
       .order('created_at', { ascending: false });
 
@@ -207,7 +208,7 @@ export async function obtenerPedidos(userPhone: string): Promise<Pedido[]> {
 }
 
 // Actualizar estado de un pedido en Supabase
-export async function actualizarEstadoPedido(id: string, nuevoEstado: EstadoPedido, userPhone: string): Promise<void> {
+export async function actualizarEstadoPedido(id: string, nuevoEstado: EstadoPedido, businessId: string): Promise<void> {
   try {
     const estadoSupabase = MAPEO_ESTADOS_INVERSO[nuevoEstado];
     
@@ -215,7 +216,7 @@ export async function actualizarEstadoPedido(id: string, nuevoEstado: EstadoPedi
       .from('orders')
       .update({ status: estadoSupabase })
       .eq('id', parseInt(id))
-      .eq('user_phone', userPhone);
+      .eq('business_id', parseInt(businessId));
 
     if (error) {
       console.error('Error actualizando estado:', error);
@@ -228,14 +229,14 @@ export async function actualizarEstadoPedido(id: string, nuevoEstado: EstadoPedi
 }
 
 // Crear un nuevo pedido en Supabase
-export async function crearPedido(pedido: Omit<Pedido, 'id' | 'timestamp' | 'hora'>, userPhone: string): Promise<Pedido> {
+export async function crearPedido(pedido: Omit<Pedido, 'id' | 'timestamp' | 'hora'>, businessId: string): Promise<Pedido> {
   try {
     
     // Crear la orden
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
-        user_phone: userPhone,
+        business_id: parseInt(businessId),
         status: 'INIT'
       })
       .select()
@@ -279,13 +280,13 @@ export async function crearPedido(pedido: Omit<Pedido, 'id' | 'timestamp' | 'hor
 }
 
 // Obtener solo órdenes con status PAYED para el contador
-export async function obtenerOrdenesPayed(userPhone: string): Promise<number> {
-  console.log("userPhone", userPhone)
+export async function obtenerOrdenesPayed(businessId: string): Promise<number> {
+  console.log("businessId", businessId)
   try {
     const { data: orders, error } = await supabase
       .from('orders')
       .select('id')
-      .eq('user_phone', userPhone)
+      .eq('business_id', parseInt(businessId))
       .eq('status', 'PAYED');
 
     if (error) {
@@ -300,8 +301,8 @@ export async function obtenerOrdenesPayed(userPhone: string): Promise<number> {
   }
 }
 
-// Obtener un pedido específico por ID y usuario
-export async function obtenerPedidoPorId(id: string, userPhone: string): Promise<Pedido | null> {
+// Obtener un pedido específico por ID y negocio
+export async function obtenerPedidoPorId(id: string, businessId: string): Promise<Pedido | null> {
   try {
     
     const { data: order, error } = await supabase
@@ -311,6 +312,7 @@ export async function obtenerPedidoPorId(id: string, userPhone: string): Promise
         status,
         created_at,
         user_phone,
+        business_id,
         price,
         order_type,
         coupon_applied,
@@ -342,7 +344,7 @@ export async function obtenerPedidoPorId(id: string, userPhone: string): Promise
         )
       `)
       .eq('id', parseInt(id))
-      .eq('user_phone', userPhone)
+      .eq('business_id', parseInt(businessId))
       .neq('status', 'INIT')
       .single();
 

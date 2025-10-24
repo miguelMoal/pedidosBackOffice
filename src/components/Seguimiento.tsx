@@ -4,7 +4,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { getTodosPedidos, type Pedido } from "../utils/pedidos";
 import { obtenerPedidos, obtenerPedidoPorId } from "../supabase/actions/pedidos";
-import { obtenerTelefonoUsuario } from "../utils/url";
+import { obtenerBusinessId } from "../utils/url";
 
 export function Seguimiento() {
   const [busqueda, setBusqueda] = useState("");
@@ -19,8 +19,8 @@ export function Seguimiento() {
         setCargando(true);
         setError(null);
         
-        const userPhone = obtenerTelefonoUsuario();
-        const pedidos = await obtenerPedidos(userPhone);
+        const businessId = obtenerBusinessId();
+        const pedidos = await obtenerPedidos(businessId);
         
         // Filtrar pedidos: excluir solo ENTREGADO (DELIVERED)
         // PAYED se mapea a NUEVO pero debe mostrarse en seguimiento
@@ -62,10 +62,10 @@ export function Seguimiento() {
       setCargando(true);
       setError(null);
       
-      const userPhone = obtenerTelefonoUsuario();
+      const businessId = obtenerBusinessId();
       
       // Primero intentar buscar por ID en Supabase
-      const pedido = await obtenerPedidoPorId(busqueda.trim(), userPhone);
+      const pedido = await obtenerPedidoPorId(busqueda.trim(), businessId);
       
       if (pedido && pedido.estado !== 'ENTREGADO') {
         setPedidoEncontrado(pedido);

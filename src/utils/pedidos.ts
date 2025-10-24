@@ -218,11 +218,11 @@ export function getTodosPedidos(): Pedido[] {
   return pedidos ? JSON.parse(pedidos) : [];
 }
 
-export async function getTodosPedidosAsync(userPhone?: string): Promise<Pedido[]> {
-  if (USE_SUPABASE && userPhone) {
+export async function getTodosPedidosAsync(businessId?: string): Promise<Pedido[]> {
+  if (USE_SUPABASE && businessId) {
     try {
       // Usar las nuevas acciones de Supabase
-      const pedidos = await obtenerPedidos(userPhone);
+      const pedidos = await obtenerPedidos(businessId);
       return pedidos;
     } catch (error) {
       console.error('Error obteniendo pedidos de Supabase, usando localStorage:', error);
@@ -232,11 +232,11 @@ export async function getTodosPedidosAsync(userPhone?: string): Promise<Pedido[]
   return getTodosPedidos();
 }
 
-export async function actualizarEstadoPedido(id: string, nuevoEstado: EstadoPedido, userPhone?: string) {
+export async function actualizarEstadoPedido(id: string, nuevoEstado: EstadoPedido, businessId?: string) {
   // Si está habilitado Supabase, actualizar primero en Supabase
-  if (USE_SUPABASE && userPhone) {
+  if (USE_SUPABASE && businessId) {
     try {
-      await actualizarEstadoPedidoAsync(id, nuevoEstado, userPhone);
+      await actualizarEstadoPedidoAsync(id, nuevoEstado, businessId);
     } catch (error) {
       console.error('Error actualizando estado en Supabase:', error);
       throw error;
@@ -262,11 +262,11 @@ export async function actualizarEstadoPedido(id: string, nuevoEstado: EstadoPedi
   }
 }
 
-export async function actualizarEstadoPedidoAsync(id: string, nuevoEstado: EstadoPedido, userPhone?: string) {
-  if (USE_SUPABASE && userPhone) {
+export async function actualizarEstadoPedidoAsync(id: string, nuevoEstado: EstadoPedido, businessId?: string) {
+  if (USE_SUPABASE && businessId) {
     try {
       // Usar las nuevas acciones de Supabase
-      await actualizarEstadoSupabase(id, nuevoEstado, userPhone);
+      await actualizarEstadoSupabase(id, nuevoEstado, businessId);
     } catch (error) {
       console.error('Error actualizando estado en Supabase:', error);
       throw error;
@@ -328,10 +328,10 @@ export function getEstadoInfo(estado: EstadoPedido): { color: string; texto: str
 }
 
 // Función para crear un nuevo pedido usando Supabase
-export async function crearPedidoNuevo(pedido: Omit<Pedido, 'id' | 'timestamp' | 'hora'>, userPhone?: string): Promise<Pedido> {
-  if (USE_SUPABASE && userPhone) {
+export async function crearPedidoNuevo(pedido: Omit<Pedido, 'id' | 'timestamp' | 'hora'>, businessId?: string): Promise<Pedido> {
+  if (USE_SUPABASE && businessId) {
     try {
-      return await crearPedidoSupabase(pedido, userPhone);
+      return await crearPedidoSupabase(pedido, businessId);
     } catch (error) {
       console.error('Error creando pedido en Supabase:', error);
       throw error;
@@ -354,10 +354,10 @@ export async function crearPedidoNuevo(pedido: Omit<Pedido, 'id' | 'timestamp' |
 }
 
 // Función para obtener un pedido específico
-export async function obtenerPedido(id: string, userPhone?: string): Promise<Pedido | null> {
-  if (USE_SUPABASE && userPhone) {
+export async function obtenerPedido(id: string, businessId?: string): Promise<Pedido | null> {
+  if (USE_SUPABASE && businessId) {
     try {
-      return await obtenerPedidoPorId(id, userPhone);
+      return await obtenerPedidoPorId(id, businessId);
     } catch (error) {
       console.error('Error obteniendo pedido de Supabase:', error);
       return null;

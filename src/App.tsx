@@ -10,7 +10,7 @@ import { Seguimiento } from "./components/Seguimiento";
 import { initializePedidos } from "./utils/pedidos";
 import { obtenerOrdenesPayed } from "./supabase/actions/pedidos";
 import { setEstadoCocina } from "./utils/cocina";
-import { obtenerTelefonoUsuario } from "./utils/url";
+import { obtenerBusinessId } from "./utils/url";
 import { Toaster } from "./components/ui/sonner";
 import { SupabaseStatus } from "./components/SupabaseStatus";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/select";
@@ -47,8 +47,8 @@ export default function App() {
     // Contar órdenes con status PAYED desde Supabase
     const calcularPendientes = async () => {
       try {
-        const userPhone = obtenerTelefonoUsuario();
-        const pendientes = await obtenerOrdenesPayed(userPhone);
+        const businessId = obtenerBusinessId();
+        const pendientes = await obtenerOrdenesPayed(businessId);
         console.log("pendientes", pendientes)
         setOrdenesPendientes(pendientes);
       } catch (error) {
